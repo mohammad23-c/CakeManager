@@ -29,9 +29,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/models/ingredient.h
         src/models/ingredient.cpp
 
+        src/models/cake.h src/models/cake.cpp
+
         src/database/DatabaseManager.h
         src/database/DatabaseManager.cpp
-        src/models/cake.h src/models/cake.cpp
     )
 
 else()
@@ -69,15 +70,39 @@ add_executable(testIngredient
     src/models/ingredient.h
     src/models/ingredient.cpp
 
+    src/models/cake.h src/models/cake.cpp
+
     src/database/DatabaseManager.h
     src/database/DatabaseManager.cpp
+
 )
 
 target_link_libraries(testIngredient PRIVATE
     Qt${QT_VERSION_MAJOR}::Sql
 )
 
+# =========================
+# Cake Test
+# =========================
 
+add_executable(testCake
+
+    tests/testCake.cpp
+
+    src/models/cake.h
+    src/models/cake.cpp
+
+    src/models/ingredient.h
+    src/models/ingredient.cpp
+
+    src/database/DatabaseManager.h
+    src/database/DatabaseManager.cpp
+)
+
+target_link_libraries(testCake PRIVATE
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Sql
+)
 # =========================
 # Application Properties
 # =========================

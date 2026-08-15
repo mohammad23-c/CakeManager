@@ -6,8 +6,8 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
-    QFile::remove("ingredient_test.db");
-    DatabaseManager database("ingredient_test.db");
+    QFile::remove("test.db");
+    DatabaseManager database("test.db");
 
     // =========================
     // Database

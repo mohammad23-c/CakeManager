@@ -6,7 +6,7 @@
 
 #include <vector>
 #include <optional>
-
+#include "../models/cake.h"
 #include "../models/ingredient.h"
 
 class DatabaseManager
@@ -16,7 +16,32 @@ public:
 
     bool openDatabase();
     bool createTables();
+    //===========================================================================
+    //ingerdient functions
+    //===========================================================================
 
+    //to get and find cake without ingredient
+    std::optional<Cake> findCake(qint64 id);
+    //to check if cake has ingredient or not, if it has return CakeIngredient, else return std::nullopt
+    std::optional<CakeIngredient> findCakeIngredient(
+        qint64 cakeId,
+        qint64 ingredientId
+        );
+    //this func return all ingredients of cake by cake id, if cake has no ingredient, it will return empty vector
+    std::vector<CakeIngredient> getCakeIngredients(qint64 cakeId);
+    //this func return all cakes in database, if database has no cake, it will return empty vector
+    std::vector<Cake> getCakes();
+
+    //this func add new cake to func
+    bool addCake(const Cake& cake);
+    //this func update cake in database, it will update name, profitPercentage and ingredients of cake
+    bool updateCake(const Cake& cake);
+    //this func delete ingredient from database by id, it will delete cake and all ingredients of cake
+    bool deleteCake(qint64 id);
+
+    //===========================================================================
+    //ingerdient functions
+    //===========================================================================
     // Adds an ingredient to the database
     bool addIngredient(const Ingredient& ingredient);
 
