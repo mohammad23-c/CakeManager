@@ -243,6 +243,40 @@ std::vector<Cake> DatabaseManager::getCakes()
     return cakes;
 }
 
+std::unordered_map<qint64, Ingredient> DatabaseManager::getIngredientsMap()
+{
+    std::unordered_map<qint64, Ingredient> ingredients;
+
+    const auto databaseIngredients = getIngredients();
+
+    for (const auto& ingredient : databaseIngredients)
+    {
+        ingredients.emplace(
+            ingredient.getId(),
+            ingredient
+            );
+    }
+
+    return ingredients;
+}
+
+std::unordered_map<qint64, Cake> DatabaseManager::getCakesMap()
+{
+    std::unordered_map<qint64, Cake> cakes;
+
+    const auto databaseCakes = getCakes();
+
+    for (const auto& cake : databaseCakes)
+    {
+        cakes.emplace(
+            cake.getId(),
+            cake
+            );
+    }
+
+    return cakes;
+}
+
 bool DatabaseManager::addCake(const Cake &cake)
 {
     if (!m_database.transaction())
@@ -582,6 +616,48 @@ std::vector<Ingredient> DatabaseManager::getIngredients()
     }
 
     return ingredients;
+}
+
+bool DatabaseManager::containsIngredient(qint64 id) const
+{
+    QSqlQuery query(m_database);
+
+    query.prepare(R"(
+        SELECT 1
+        FROM ingredients
+        WHERE id = :id
+        LIMIT 1
+    )");
+
+    query.bindValue(":id", id);
+
+    if (!query.exec())
+    {
+        return false;
+    }
+
+    return query.next();
+}
+
+bool DatabaseManager::containsCake(qint64 id) const
+{
+    QSqlQuery query(m_database);
+
+    query.prepare(R"(
+        SELECT 1
+        FROM cakes
+        WHERE id = :id
+        LIMIT 1
+    )");
+
+    query.bindValue(":id", id);
+
+    if (!query.exec())
+    {
+        return false;
+    }
+
+    return query.next();
 }
 
 bool DatabaseManager::updateIngredientName(

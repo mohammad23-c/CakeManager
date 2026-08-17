@@ -30,6 +30,11 @@ void Cake::setProfitPercentage(double profitPercentage)
     this->m_profitPercentage = profitPercentage;
 }
 
+void Cake::setId(qint64 id)
+{
+    this->m_id=id;
+}
+
 qint64 Cake::getId() const
 {
     return m_id;

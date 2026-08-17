@@ -25,6 +25,17 @@ public:
         qint64 pricePerUnit,
         const QString& imagePath
         );
+
+    // Copy
+    Ingredient(const Ingredient& other) = default;
+    Ingredient& operator=(const Ingredient& other) = default;
+
+    // Move
+    Ingredient(Ingredient&& other) noexcept = default;
+    Ingredient& operator=(Ingredient&& other) noexcept = default;
+
+    // Destructor
+    ~Ingredient() = default;
 //getter and setter
     qint64 getId() const;
     void setId(qint64 id);

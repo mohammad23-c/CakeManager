@@ -264,7 +264,7 @@ int main(int argc, char *argv[])
     // =========================================
 
     qDebug() << "=================================";
-    qDebug() << "All Cake tests passed!|||||";
+    qDebug() << "All Cake tests passed!";
     qDebug() << "=================================";
 
     return 0;

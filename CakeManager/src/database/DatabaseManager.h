@@ -3,6 +3,7 @@
 
 #include <QSqlDatabase>
 #include <QString>
+#include <unordered_map>
 
 #include <vector>
 #include <optional>
@@ -31,6 +32,9 @@ public:
     std::vector<CakeIngredient> getCakeIngredients(qint64 cakeId);
     //this func return all cakes in database, if database has no cake, it will return empty vector
     std::vector<Cake> getCakes();
+    //get cakes and get ingredient with onordered map
+    std::unordered_map<qint64, Ingredient> getIngredientsMap();
+    std::unordered_map<qint64, Cake> getCakesMap();
 
     //this func add new cake to func
     bool addCake(const Cake& cake);
@@ -72,6 +76,13 @@ public:
     // Gets all ingredients from the database.
     std::vector<Ingredient> getIngredients();
 
+    //=======================================================================
+    //save all from memory to database (from unordered_map memory to database)
+    //===========================================================================
+
+    //contains
+    bool containsIngredient(qint64 id) const;
+    bool containsCake(qint64 id) const;
 
 
 private:
