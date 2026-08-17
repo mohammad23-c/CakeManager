@@ -84,10 +84,13 @@ public:
     bool containsIngredient(qint64 id) const;
     bool containsCake(qint64 id) const;
 
+    //destructor
+    ~DatabaseManager();
 
 private:
     QSqlDatabase m_database;
     QString m_databaseName;
+    QString m_connectionName;
 };
 
 #endif // DATABASEMANAGER_H

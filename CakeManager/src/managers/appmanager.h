@@ -42,7 +42,7 @@ public:
     bool deleteIngredient(qint64 id);
 
     std::optional<Ingredient> findIngredient(qint64 id) const;
-
+    std::optional<Ingredient> findIngredient(QString name) const;
 
     // =========================================
     // Cake
@@ -55,7 +55,7 @@ public:
     bool deleteCake(qint64 id);
 
     std::optional<Cake> findCake(qint64 id) const;
-
+    std::optional<Cake> findCake(QString name) const;
 
     // =========================================
     // Cake / Ingredient Relations

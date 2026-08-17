@@ -229,6 +229,19 @@ std::optional<Ingredient> AppManager::findIngredient(qint64 id) const
     return it->second;
 }
 
+std::optional<Ingredient> AppManager::findIngredient(QString name) const
+{
+    for (const auto& in : m_ingredients)
+    {
+        if (in.second.getName() == name)
+        {
+            return in.second;
+        }
+    }
+
+    return std::nullopt;
+}
+
 bool AppManager::addCake(const Cake &cake)
 {
 
@@ -333,6 +346,16 @@ std::optional<Cake> AppManager::findCake(qint64 id) const
     }
 
     return it->second;
+}
+
+std::optional<Cake> AppManager::findCake(QString name) const
+{
+    for(const auto& c:m_cakes){
+        if(c.second.getName()==name){
+            return c.second;
+        }
+    }
+    return std::nullopt;
 }
 
 bool AppManager::isIngredientUsedInCake(qint64 ingredientId) const

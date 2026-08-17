@@ -6,11 +6,19 @@
 #include "../models/cake.h"
 
 DatabaseManager::DatabaseManager(const QString& databaseName)
-    : m_databaseName(databaseName)
+    : m_databaseName(databaseName),
+    m_connectionName(
+        "DatabaseManager_" +
+        QString::number(reinterpret_cast<quintptr>(this))
+        )
 {
-    m_database = QSqlDatabase::addDatabase("QSQLITE");
-}
+    m_database = QSqlDatabase::addDatabase(
+        "QSQLITE",
+        m_connectionName
+        );
 
+    m_database.setDatabaseName(m_databaseName);
+}
 bool DatabaseManager::openDatabase()
 {
     m_database.setDatabaseName(m_databaseName);
@@ -658,6 +666,18 @@ bool DatabaseManager::containsCake(qint64 id) const
     }
 
     return query.next();
+}
+
+DatabaseManager::~DatabaseManager()
+{
+    if (m_database.isOpen())
+    {
+        m_database.close();
+    }
+
+    m_database = QSqlDatabase();
+
+    QSqlDatabase::removeDatabase(m_connectionName);
 }
 
 bool DatabaseManager::updateIngredientName(
