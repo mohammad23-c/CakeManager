@@ -686,6 +686,519 @@ std::vector<Ingredient> DatabaseManager::getIngredients()
     return ingredients;
 }
 
+std::optional<Daily>
+DatabaseManager::findDaily(qint64 id)
+{
+    QSqlQuery query(m_database);
+
+    query.prepare(R"(
+        SELECT id, date, total_cost, total_sales
+        FROM dailies
+        WHERE id = :id
+    )");
+
+    query.bindValue(":id", id);
+
+    if (!query.exec())
+    {
+        qDebug() << "Failed to find daily:"
+                 << query.lastError().text();
+
+        return std::nullopt;
+    }
+
+    if (!query.next())
+    {
+        return std::nullopt;
+    }
+
+    qint64 dailyId =
+        query.value("id").toLongLong();
+
+    QDate date =
+        QDate::fromString(
+            query.value("date").toString(),
+            "yyyy-MM-dd"
+            );
+
+    DailySummary summary;
+
+    summary.totalCost =
+        query.value("total_cost").toDouble();
+
+    summary.totalSales =
+        query.value("total_sales").toDouble();
+
+
+    // Get cakes of this daily
+    std::vector<DailyCake> cakes =
+        getDailyCakes(dailyId);
+
+
+    Daily daily(
+        dailyId,
+        date,
+        cakes
+        );
+
+    daily.setSummary(summary);
+
+    return daily;
+}
+
+std::optional<DailyCake>
+DatabaseManager::findDailyCake(
+    qint64 dailyId,
+    qint64 cakeId
+    )
+{
+    QSqlQuery query(m_database);
+
+    query.prepare(R"(
+        SELECT cake_id, quantity
+        FROM daily_cakes
+        WHERE daily_id = :dailyId
+          AND cake_id = :cakeId
+        LIMIT 1
+    )");
+
+    query.bindValue(":dailyId", dailyId);
+    query.bindValue(":cakeId", cakeId);
+
+    if (!query.exec())
+    {
+        qDebug() << "Failed to find daily cake:"
+                 << query.lastError().text();
+
+        return std::nullopt;
+    }
+
+    if (!query.next())
+    {
+        return std::nullopt;
+    }
+
+    DailyCake dailyCake;
+
+    dailyCake.cakeId =
+        query.value("cake_id").toLongLong();
+
+    dailyCake.quantity =
+        query.value("quantity").toDouble();
+
+    return dailyCake;
+}
+std::vector<DailyCake>
+DatabaseManager::getDailyCakes(qint64 dailyId)
+{
+    std::vector<DailyCake> cakes;
+
+    QSqlQuery query(m_database);
+
+    query.prepare(R"(
+        SELECT cake_id, quantity
+        FROM daily_cakes
+        WHERE daily_id = :dailyId
+    )");
+
+    query.bindValue(":dailyId", dailyId);
+
+    if (!query.exec())
+    {
+        qDebug() << "Failed to get daily cakes:"
+                 << query.lastError().text();
+
+        return cakes;
+    }
+
+    while (query.next())
+    {
+        DailyCake cake;
+
+        cake.cakeId =
+            query.value("cake_id").toLongLong();
+
+        cake.quantity =
+            query.value("quantity").toDouble();
+
+        cakes.push_back(cake);
+    }
+
+    return cakes;
+}
+
+std::vector<Daily>
+DatabaseManager::getDailies()
+{
+    std::vector<Daily> dailies;
+
+    QSqlQuery query(m_database);
+
+    query.prepare(R"(
+        SELECT id, date, total_cost, total_sales
+        FROM dailies
+    )");
+
+    if (!query.exec())
+    {
+        qDebug() << "Failed to get dailies:"
+                 << query.lastError().text();
+
+        return dailies;
+    }
+
+    while (query.next())
+    {
+        qint64 dailyId =
+            query.value("id").toLongLong();
+
+        QDate date =
+            QDate::fromString(
+                query.value("date").toString(),
+                "yyyy-MM-dd"
+                );
+
+        DailySummary summary;
+
+        summary.totalCost =
+            query.value("total_cost").toDouble();
+
+        summary.totalSales =
+            query.value("total_sales").toDouble();
+
+        std::vector<DailyCake> cakes =
+            getDailyCakes(dailyId);
+
+        Daily daily(
+            dailyId,
+            date,
+            cakes
+            );
+
+        daily.setSummary(summary);
+
+        dailies.push_back(daily);
+    }
+
+    return dailies;
+}
+
+std::unordered_map<qint64, Daily>
+DatabaseManager::getDailiesMap()
+{
+    std::unordered_map<qint64, Daily> dailies;
+
+    std::vector<Daily> allDailies = getDailies();
+
+    for (const auto& daily : allDailies)
+    {
+        dailies.emplace(
+            daily.getId(),
+            daily
+            );
+    }
+
+    return dailies;
+}
+
+bool DatabaseManager::addDaily(const Daily& daily)
+{
+    if (!m_database.transaction())
+    {
+        qDebug() << "Failed to start transaction:"
+                 << m_database.lastError().text();
+
+        return false;
+    }
+
+    QSqlQuery query(m_database);
+
+    // =========================================
+    // Add Daily
+    // =========================================
+
+    query.prepare(R"(
+        INSERT INTO dailies
+        (date, total_cost, total_sales)
+        VALUES (:date, :totalCost, :totalSales)
+    )");
+
+    query.bindValue(
+        ":date",
+        daily.getDate().toString("yyyy-MM-dd")
+        );
+
+    query.bindValue(
+        ":totalCost",
+        daily.getSummary().totalCost
+        );
+
+    query.bindValue(
+        ":totalSales",
+        daily.getSummary().totalSales
+        );
+
+    if (!query.exec())
+    {
+        qDebug() << "Failed to add daily:"
+                 << query.lastError().text();
+
+        m_database.rollback();
+        return false;
+    }
+
+
+    // Get generated Daily ID
+    qint64 dailyId =
+        query.lastInsertId().toLongLong();
+
+
+    // =========================================
+    // Add Daily Cakes
+    // =========================================
+
+    for (const auto& cake : daily.getCakes())
+    {
+        query.prepare(R"(
+            INSERT INTO daily_cakes
+            (daily_id, cake_id, quantity)
+            VALUES (:dailyId, :cakeId, :quantity)
+        )");
+
+        query.bindValue(":dailyId", dailyId);
+        query.bindValue(":cakeId", cake.cakeId);
+        query.bindValue(":quantity", cake.quantity);
+
+        if (!query.exec())
+        {
+            qDebug() << "Failed to add daily cake:"
+                     << query.lastError().text();
+
+            m_database.rollback();
+            return false;
+        }
+    }
+
+
+    // =========================================
+    // Commit
+    // =========================================
+
+    if (!m_database.commit())
+    {
+        qDebug() << "Failed to commit transaction:"
+                 << m_database.lastError().text();
+
+        m_database.rollback();
+        return false;
+    }
+
+    return true;
+}
+
+bool DatabaseManager::updateDaily(const Daily& daily)
+{
+    if (!m_database.transaction())
+    {
+        qDebug() << "Failed to start transaction:"
+                 << m_database.lastError().text();
+
+        return false;
+    }
+
+    QSqlQuery query(m_database);
+
+
+    // =========================================
+    // Update Daily
+    // =========================================
+
+    query.prepare(R"(
+        UPDATE dailies
+        SET date = :date,
+            total_cost = :totalCost,
+            total_sales = :totalSales
+        WHERE id = :id
+    )");
+
+    query.bindValue(
+        ":date",
+        daily.getDate().toString("yyyy-MM-dd")
+        );
+
+    query.bindValue(
+        ":totalCost",
+        daily.getSummary().totalCost
+        );
+
+    query.bindValue(
+        ":totalSales",
+        daily.getSummary().totalSales
+        );
+
+    query.bindValue(
+        ":id",
+        daily.getId()
+        );
+
+    if (!query.exec())
+    {
+        qDebug() << "Failed to update daily:"
+                 << query.lastError().text();
+
+        m_database.rollback();
+        return false;
+    }
+
+
+    // =========================================
+    // Delete old Daily Cakes
+    // =========================================
+
+    query.prepare(R"(
+        DELETE FROM daily_cakes
+        WHERE daily_id = :dailyId
+    )");
+
+    query.bindValue(
+        ":dailyId",
+        daily.getId()
+        );
+
+    if (!query.exec())
+    {
+        qDebug() << "Failed to delete old daily cakes:"
+                 << query.lastError().text();
+
+        m_database.rollback();
+        return false;
+    }
+
+
+    // =========================================
+    // Add new Daily Cakes
+    // =========================================
+
+    for (const auto& cake : daily.getCakes())
+    {
+        query.prepare(R"(
+            INSERT INTO daily_cakes
+            (daily_id, cake_id, quantity)
+            VALUES (:dailyId, :cakeId, :quantity)
+        )");
+
+        query.bindValue(
+            ":dailyId",
+            daily.getId()
+            );
+
+        query.bindValue(
+            ":cakeId",
+            cake.cakeId
+            );
+
+        query.bindValue(
+            ":quantity",
+            cake.quantity
+            );
+
+        if (!query.exec())
+        {
+            qDebug() << "Failed to add daily cake:"
+                     << query.lastError().text();
+
+            m_database.rollback();
+            return false;
+        }
+    }
+
+
+    // =========================================
+    // Commit
+    // =========================================
+
+    if (!m_database.commit())
+    {
+        qDebug() << "Failed to commit transaction:"
+                 << m_database.lastError().text();
+
+        m_database.rollback();
+        return false;
+    }
+
+    return true;
+}
+
+bool DatabaseManager::deleteDaily(qint64 id)
+{
+    if (!m_database.transaction())
+    {
+        qDebug() << "Failed to start transaction:"
+                 << m_database.lastError().text();
+
+        return false;
+    }
+
+    QSqlQuery query(m_database);
+
+
+    // =========================================
+    // Delete Daily Cakes
+    // =========================================
+
+    query.prepare(R"(
+        DELETE FROM daily_cakes
+        WHERE daily_id = :dailyId
+    )");
+
+    query.bindValue(":dailyId", id);
+
+    if (!query.exec())
+    {
+        qDebug() << "Failed to delete daily cakes:"
+                 << query.lastError().text();
+
+        m_database.rollback();
+        return false;
+    }
+
+
+    // =========================================
+    // Delete Daily
+    // =========================================
+
+    query.prepare(R"(
+        DELETE FROM dailies
+        WHERE id = :id
+    )");
+
+    query.bindValue(":id", id);
+
+    if (!query.exec())
+    {
+        qDebug() << "Failed to delete daily:"
+                 << query.lastError().text();
+
+        m_database.rollback();
+        return false;
+    }
+
+
+    // =========================================
+    // Commit
+    // =========================================
+
+    if (!m_database.commit())
+    {
+        qDebug() << "Failed to commit transaction:"
+                 << m_database.lastError().text();
+
+        m_database.rollback();
+        return false;
+    }
+
+    return true;
+}
 bool DatabaseManager::containsIngredient(qint64 id) const
 {
     QSqlQuery query(m_database);
@@ -722,6 +1235,30 @@ bool DatabaseManager::containsCake(qint64 id) const
 
     if (!query.exec())
     {
+        return false;
+    }
+
+    return query.next();
+}
+
+bool DatabaseManager::containsDaily(qint64 id)
+{
+    QSqlQuery query(m_database);
+
+    query.prepare(R"(
+        SELECT 1
+        FROM dailies
+        WHERE id = :id
+        LIMIT 1
+    )");
+
+    query.bindValue(":id", id);
+
+    if (!query.exec())
+    {
+        qDebug() << "Failed to check daily:"
+                 << query.lastError().text();
+
         return false;
     }
 

@@ -80,6 +80,9 @@ add_executable(testIngredient
     src/database/DatabaseManager.h
     src/database/DatabaseManager.cpp
 
+    src/models/daily.h
+    src/models/daily.cpp
+
 )
 
 target_link_libraries(testIngredient PRIVATE
@@ -103,6 +106,9 @@ add_executable(testCake
 
     src/database/DatabaseManager.h
     src/database/DatabaseManager.cpp
+
+    src/models/daily.h
+    src/models/daily.cpp
 )
 
 target_link_libraries(testCake PRIVATE
@@ -127,15 +133,37 @@ add_executable(testAppManager
 
     src/database/DatabaseManager.h
     src/database/DatabaseManager.cpp
+
+    src/models/daily.h
+    src/models/daily.cpp
 )
 
 target_link_libraries(testAppManager PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Sql
 )
+# =========================
+# DAILY test
+# =========================
+add_executable(testDaily
 
+    tests/dailyTest.cpp
 
+    src/models/ingredient.h
+    src/models/ingredient.cpp
 
+    src/models/cake.h src/models/cake.cpp
+
+    src/database/DatabaseManager.h
+    src/database/DatabaseManager.cpp
+
+    src/models/daily.h
+    src/models/daily.cpp
+)
+target_link_libraries(testDaily PRIVATE
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Sql
+)
 # =========================
 # Application Properties
 # =========================

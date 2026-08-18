@@ -4,9 +4,10 @@
 #include <QSqlDatabase>
 #include <QString>
 #include <unordered_map>
-
 #include <vector>
 #include <optional>
+
+#include "../models/daily.h"
 #include "../models/cake.h"
 #include "../models/ingredient.h"
 
@@ -18,7 +19,7 @@ public:
     bool openDatabase();
     bool createTables();
     //===========================================================================
-    //ingerdient functions
+    //Cake functions
     //===========================================================================
 
     //to get and find cake without ingredient
@@ -33,7 +34,6 @@ public:
     //this func return all cakes in database, if database has no cake, it will return empty vector
     std::vector<Cake> getCakes();
     //get cakes and get ingredient with onordered map
-    std::unordered_map<qint64, Ingredient> getIngredientsMap();
     std::unordered_map<qint64, Cake> getCakesMap();
 
     //this func add new cake to func
@@ -46,6 +46,8 @@ public:
     //===========================================================================
     //ingerdient functions
     //===========================================================================
+    std::unordered_map<qint64, Ingredient> getIngredientsMap();
+
     // Adds an ingredient to the database
     bool addIngredient(const Ingredient& ingredient);
 
@@ -76,6 +78,41 @@ public:
     // Gets all ingredients from the database.
     std::vector<Ingredient> getIngredients();
 
+
+    //===========================================================================
+    // Daily functions
+    //===========================================================================
+
+    // Get one Daily by ID
+    std::optional<Daily> findDaily(qint64 id);
+
+    // Find a specific cake inside a Daily
+    std::optional<DailyCake> findDailyCake(
+        qint64 dailyId,
+        qint64 cakeId
+        );
+
+    // Get all cakes/orders of a Daily
+    std::vector<DailyCake> getDailyCakes(qint64 dailyId);
+
+    // Get all Daily records
+    std::vector<Daily> getDailies();
+
+    // Get all Daily records as unordered_map
+    std::unordered_map<qint64, Daily> getDailiesMap();
+
+    // Add a new Daily
+    bool addDaily(const Daily& daily);
+
+    // Update a Daily
+    // Updates date, summary and all cake orders
+    bool updateDaily(const Daily& daily);
+
+    // Delete a Daily and all of its cake orders
+    bool deleteDaily(qint64 id);
+
+
+
     //=======================================================================
     //save all from memory to database (from unordered_map memory to database)
     //===========================================================================
@@ -83,6 +120,8 @@ public:
     //contains
     bool containsIngredient(qint64 id) const;
     bool containsCake(qint64 id) const;
+    // Check whether a Daily exists
+    bool containsDaily(qint64 id);
 
     //destructor
     ~DatabaseManager();
