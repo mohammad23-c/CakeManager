@@ -36,6 +36,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/database/DatabaseManager.cpp
         src/managers/appmanager.h src/managers/appmanager.cpp
         tests/testAppManager.cpp
+        src/models/daily.h src/models/daily.cpp
     )
 
 else()

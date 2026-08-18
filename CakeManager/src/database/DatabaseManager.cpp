@@ -35,7 +35,11 @@ bool DatabaseManager::openDatabase()
 bool DatabaseManager::createTables()
 {
     QSqlQuery query(m_database);
-    //ingredient table
+
+    // =========================================
+    // Ingredient table
+    // =========================================
+
     QString sql = R"(
         CREATE TABLE IF NOT EXISTS ingredients (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -54,7 +58,11 @@ bool DatabaseManager::createTables()
         return false;
     }
 
-    // Cakes
+
+    // =========================================
+    // Cake table
+    // =========================================
+
     if (!query.exec(R"(
         CREATE TABLE IF NOT EXISTS cakes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -69,7 +77,11 @@ bool DatabaseManager::createTables()
         return false;
     }
 
+
+    // =========================================
     // Cake - Ingredient relation
+    // =========================================
+
     if (!query.exec(R"(
         CREATE TABLE IF NOT EXISTS cake_ingredients (
             cake_id INTEGER NOT NULL,
@@ -91,6 +103,54 @@ bool DatabaseManager::createTables()
 
         return false;
     }
+
+
+    // =========================================
+    // Daily table
+    // =========================================
+
+    if (!query.exec(R"(
+        CREATE TABLE IF NOT EXISTS dailies (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT NOT NULL,
+            total_cost REAL NOT NULL,
+            total_sales REAL NOT NULL
+        )
+    )"))
+    {
+        qDebug() << "Dailies table creation error:"
+                 << query.lastError().text();
+
+        return false;
+    }
+
+
+    // =========================================
+    // Daily - Cake relation
+    // =========================================
+
+    if (!query.exec(R"(
+        CREATE TABLE IF NOT EXISTS daily_cakes (
+            daily_id INTEGER NOT NULL,
+            cake_id INTEGER NOT NULL,
+            quantity REAL NOT NULL,
+
+            PRIMARY KEY (daily_id, cake_id),
+
+            FOREIGN KEY (daily_id)
+                REFERENCES dailies(id),
+
+            FOREIGN KEY (cake_id)
+                REFERENCES cakes(id)
+        )
+    )"))
+    {
+        qDebug() << "Daily cakes table creation error:"
+                 << query.lastError().text();
+
+        return false;
+    }
+
 
     return true;
 }
