@@ -1,0 +1,17 @@
+CakeManager/main.cpp
+CakeManager/src/database/DatabaseManager.cpp
+CakeManager/src/database/DatabaseManager.h
+CakeManager/src/managers/appmanager.cpp
+CakeManager/src/managers/appmanager.h
+CakeManager/src/models/cake.cpp
+CakeManager/src/models/cake.h
+CakeManager/src/models/daily.cpp
+CakeManager/src/models/daily.h
+CakeManager/src/models/ingredient.cpp
+CakeManager/src/models/ingredient.h
+CakeManager/src/ui/mainwindow.cpp
+CakeManager/src/ui/mainwindow.h
+CakeManager/tests/dailyTest.cpp
+CakeManager/tests/testAppManager.cpp
+CakeManager/tests/testCake.cpp
+CakeManager/tests/testIngredient.cpp

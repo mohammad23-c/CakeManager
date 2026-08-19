@@ -8,18 +8,13 @@ Ingredient::Ingredient()
 {
 }
 
-Ingredient::Ingredient(
-    qint64 id,
-    const QString& name,
-    Unit unit,
-    qint64 pricePerUnit,
-    const QString& imagePath
-    )
-    : m_id(id),
+Ingredient::Ingredient(qint64 id, const QString &name, Unit unit, qint64 pricePerUnit, qint64 weightPerUnit ,const QString &imagePath):
+    m_id(id),
     m_name(name),
     m_unit(unit),
     m_pricePerUnit(pricePerUnit),
-    m_imagePath(imagePath)
+    m_imagePath(imagePath),
+    m_weightPerUnit(weightPerUnit)
 {
 }
 
@@ -63,6 +58,16 @@ void Ingredient::setPricePerUnit(qint64 pricePerUnit)
     m_pricePerUnit = pricePerUnit;
 }
 
+void Ingredient::setWeightPerUnit(qint64 gram)
+{
+    this->m_weightPerUnit=gram;
+}
+
+qint64 Ingredient::getWeightPerUnit() const
+{
+    return m_weightPerUnit;
+}
+
 QString Ingredient::getImagePath() const
 {
     return m_imagePath;
@@ -90,12 +95,14 @@ QString Ingredient::unitToString(Unit u)
 
 QString Ingredient::toString() const
 {
-
-    return QString("Ingredient{id=%1, name=%2, unit=%3, pricePerUnit=%4, imagePath=%5}")
-    .arg(m_id)
+    return QString(
+               "Ingredient{id=%1, name=%2, unit=%3, pricePerUnit=%4, "
+               "imagePath=%5, weightPerUnit=%6}"
+               )
+        .arg(m_id)
         .arg(m_name)
         .arg(Ingredient::unitToString(m_unit))
         .arg(m_pricePerUnit)
-        .arg(m_imagePath);
-
+        .arg(m_imagePath)
+        .arg(m_weightPerUnit);
 }

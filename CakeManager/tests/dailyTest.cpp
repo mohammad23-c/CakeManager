@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
         "Flour",
         Ingredient::Unit::Gram,
         120000,
+        0,
         ""
         );
 
@@ -53,6 +54,7 @@ int main(int argc, char *argv[])
         "Sugar",
         Ingredient::Unit::Gram,
         80000,
+        0,
         ""
         );
 
@@ -61,6 +63,7 @@ int main(int argc, char *argv[])
         "Chocolate",
         Ingredient::Unit::Gram,
         250000,
+        0,
         ""
         );
 
@@ -69,6 +72,7 @@ int main(int argc, char *argv[])
         "Milk",
         Ingredient::Unit::Gram,
         100000,
+        0,
         ""
         );
 
@@ -132,7 +136,8 @@ int main(int argc, char *argv[])
         0,
         "Chocolate Cake",
         25.0,
-        chocolateCakeIngredients
+        chocolateCakeIngredients,
+        ""
         );
 
 
@@ -146,7 +151,8 @@ int main(int argc, char *argv[])
         0,
         "Sugar Cake",
         15.0,
-        sugarCakeIngredients
+        sugarCakeIngredients,
+        ""
         );
 
 

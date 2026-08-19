@@ -21,7 +21,8 @@ public:
         qint64 id,
         const QString& name,
         double profitPercentage,
-        const std::vector<CakeIngredient>& ingredients
+        const std::vector<CakeIngredient>& ingredients,
+        const QString& imagePath
         );
     Cake(const Cake &other)=default;
 
@@ -36,6 +37,8 @@ public:
 
     ~Cake() = default;
 
+    QString getImagePath() const;
+    void setImagePath(const QString& imagePath);
 
     double getProfitPercentage() const;
     void setProfitPercentage(double profitPercentage);
@@ -63,6 +66,8 @@ private:
 
     //this vec store ingredients of cake, each ingredient has id and quantity
     std::vector<CakeIngredient> m_ingredients;
+    QString m_imagePath;
+
 };
 
 #endif // CAKE_H

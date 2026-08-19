@@ -41,14 +41,15 @@ bool DatabaseManager::createTables()
     // =========================================
 
     QString sql = R"(
-        CREATE TABLE IF NOT EXISTS ingredients (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            unit INTEGER NOT NULL,
-            price_per_unit INTEGER NOT NULL,
-            image_path TEXT
-        )
-    )";
+    CREATE TABLE IF NOT EXISTS ingredients (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        unit INTEGER NOT NULL,
+        price_per_unit INTEGER NOT NULL,
+        weight_per_unit INTEGER NOT NULL,
+        image_path TEXT
+    )
+)";
 
     if (!query.exec(sql))
     {
@@ -64,11 +65,12 @@ bool DatabaseManager::createTables()
     // =========================================
 
     if (!query.exec(R"(
-        CREATE TABLE IF NOT EXISTS cakes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            profit_percentage REAL NOT NULL
-        )
+    CREATE TABLE IF NOT EXISTS cakes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        profit_percentage REAL NOT NULL,
+        image_path TEXT
+    )
     )"))
     {
         qDebug() << "Cakes table creation error:"
@@ -156,10 +158,15 @@ bool DatabaseManager::createTables()
 }
 
 std::optional<Cake> DatabaseManager::findCake(qint64 id)
-{QSqlQuery query(m_database);
+{
+    QSqlQuery query(m_database);
 
     query.prepare(R"(
-        SELECT id, name, profit_percentage
+        SELECT
+            id,
+            name,
+            profit_percentage,
+            image_path
         FROM cakes
         WHERE id = :id
     )");
@@ -178,17 +185,21 @@ std::optional<Cake> DatabaseManager::findCake(qint64 id)
     {
         return std::nullopt;
     }
+
     std::vector<CakeIngredient> ingredients =
-        getCakeIngredients(query.value("id").toLongLong());
+        getCakeIngredients(
+            query.value("id").toLongLong()
+            );
+
     Cake cake(
         query.value("id").toLongLong(),
         query.value("name").toString(),
         query.value("profit_percentage").toDouble(),
-        ingredients
+        ingredients,
+        query.value("image_path").toString()
         );
 
     return cake;
-
 }
 
 std::optional<CakeIngredient> DatabaseManager::findCakeIngredient(qint64 cakeId, qint64 ingredientId)
@@ -274,7 +285,11 @@ std::vector<Cake> DatabaseManager::getCakes()
     QSqlQuery query(m_database);
 
     if (!query.exec(R"(
-        SELECT id, name, profit_percentage
+        SELECT
+            id,
+            name,
+            profit_percentage,
+            image_path
         FROM cakes
     )"))
     {
@@ -295,6 +310,9 @@ std::vector<Cake> DatabaseManager::getCakes()
         double profitPercentage =
             query.value("profit_percentage").toDouble();
 
+        QString imagePath =
+            query.value("image_path").toString();
+
         std::vector<CakeIngredient> ingredients =
             getCakeIngredients(id);
 
@@ -302,7 +320,8 @@ std::vector<Cake> DatabaseManager::getCakes()
             id,
             name,
             profitPercentage,
-            ingredients
+            ingredients,
+            imagePath
             );
 
         cakes.push_back(cake);
@@ -345,7 +364,7 @@ std::unordered_map<qint64, Cake> DatabaseManager::getCakesMap()
     return cakes;
 }
 
-bool DatabaseManager::addCake(const Cake &cake)
+bool DatabaseManager::addCake(const Cake& cake)
 {
     if (!m_database.transaction())
     {
@@ -360,12 +379,13 @@ bool DatabaseManager::addCake(const Cake &cake)
     // Add cake
     query.prepare(R"(
         INSERT INTO cakes
-        (name, profit_percentage)
-        VALUES (:name, :profit)
+        (name, profit_percentage, image_path)
+        VALUES (:name, :profit, :imagePath)
     )");
 
     query.bindValue(":name", cake.getName());
     query.bindValue(":profit", cake.getProfitPercentage());
+    query.bindValue(":imagePath", cake.getImagePath());
 
     if (!query.exec())
     {
@@ -377,7 +397,8 @@ bool DatabaseManager::addCake(const Cake &cake)
     }
 
     // Get generated cake ID
-    qint64 cakeId = query.lastInsertId().toLongLong();
+    qint64 cakeId =
+        query.lastInsertId().toLongLong();
 
     // Add ingredients
     for (const auto& ingredient : cake.getIngredients())
@@ -389,8 +410,14 @@ bool DatabaseManager::addCake(const Cake &cake)
         )");
 
         query.bindValue(":cakeId", cakeId);
-        query.bindValue(":ingredientId", ingredient.ingredientId);
-        query.bindValue(":quantity", ingredient.quantity);
+        query.bindValue(
+            ":ingredientId",
+            ingredient.ingredientId
+            );
+        query.bindValue(
+            ":quantity",
+            ingredient.quantity
+            );
 
         if (!query.exec())
         {
@@ -414,7 +441,7 @@ bool DatabaseManager::addCake(const Cake &cake)
     return true;
 }
 
-bool DatabaseManager::updateCake(const Cake &cake)
+bool DatabaseManager::updateCake(const Cake& cake)
 {
     if (!m_database.transaction())
     {
@@ -427,13 +454,15 @@ bool DatabaseManager::updateCake(const Cake &cake)
     query.prepare(R"(
         UPDATE cakes
         SET name = :name,
-            profit_percentage = :profit
+            profit_percentage = :profit,
+            image_path = :imagePath
         WHERE id = :id
     )");
 
     query.bindValue(":id", cake.getId());
     query.bindValue(":name", cake.getName());
     query.bindValue(":profit", cake.getProfitPercentage());
+    query.bindValue(":imagePath", cake.getImagePath());
 
     if (!query.exec())
     {
@@ -471,8 +500,14 @@ bool DatabaseManager::updateCake(const Cake &cake)
         )");
 
         query.bindValue(":cakeId", cake.getId());
-        query.bindValue(":ingredientId", ingredient.ingredientId);
-        query.bindValue(":quantity", ingredient.quantity);
+        query.bindValue(
+            ":ingredientId",
+            ingredient.ingredientId
+            );
+        query.bindValue(
+            ":quantity",
+            ingredient.quantity
+            );
 
         if (!query.exec())
         {
@@ -548,13 +583,14 @@ bool DatabaseManager::addIngredient(const Ingredient& ingredient)
 
     query.prepare(R"(
         INSERT INTO ingredients
-        (name, unit, price_per_unit, image_path)
-        VALUES (:name, :unit, :price, :imagePath)
+        (name, unit, price_per_unit, weight_per_unit, image_path)
+        VALUES (:name, :unit, :price, :weightPerUnit, :imagePath)
     )");
 
     query.bindValue(":name", ingredient.getName());
     query.bindValue(":unit", static_cast<int>(ingredient.getUnit()));
     query.bindValue(":price", ingredient.getPricePerUnit());
+    query.bindValue(":weightPerUnit", ingredient.getWeightPerUnit());
     query.bindValue(":imagePath", ingredient.getImagePath());
 
     if (!query.exec())
@@ -590,7 +626,7 @@ bool DatabaseManager::deleteIngredient(qint64 id)
     return query.numRowsAffected() > 0;
 }
 
-bool DatabaseManager::updateIngredient(const Ingredient &ingredient)
+bool DatabaseManager::updateIngredient(const Ingredient& ingredient)
 {
     QSqlQuery query(m_database);
 
@@ -599,6 +635,7 @@ bool DatabaseManager::updateIngredient(const Ingredient &ingredient)
         SET name = :name,
             unit = :unit,
             price_per_unit = :price,
+            weight_per_unit = :weightPerUnit,
             image_path = :imagePath
         WHERE id = :id
     )");
@@ -607,6 +644,7 @@ bool DatabaseManager::updateIngredient(const Ingredient &ingredient)
     query.bindValue(":name", ingredient.getName());
     query.bindValue(":unit", static_cast<int>(ingredient.getUnit()));
     query.bindValue(":price", ingredient.getPricePerUnit());
+    query.bindValue(":weightPerUnit", ingredient.getWeightPerUnit());
     query.bindValue(":imagePath", ingredient.getImagePath());
 
     if (!query.exec())
@@ -617,14 +655,22 @@ bool DatabaseManager::updateIngredient(const Ingredient &ingredient)
         return false;
     }
 
-return query.numRowsAffected() > 0;}
+    return query.numRowsAffected() > 0;
+}
 
-std::optional<Ingredient> DatabaseManager::getIngredient(qint64 id)
+std::optional<Ingredient>
+DatabaseManager::getIngredient(qint64 id)
 {
     QSqlQuery query(m_database);
 
     query.prepare(R"(
-        SELECT id, name, unit, price_per_unit, image_path
+        SELECT
+            id,
+            name,
+            unit,
+            price_per_unit,
+            weight_per_unit,
+            image_path
         FROM ingredients
         WHERE id = :id
     )");
@@ -651,6 +697,7 @@ std::optional<Ingredient> DatabaseManager::getIngredient(qint64 id)
             query.value("unit").toInt()
             ),
         query.value("price_per_unit").toLongLong(),
+        query.value("weight_per_unit").toLongLong(),
         query.value("image_path").toString()
         );
 

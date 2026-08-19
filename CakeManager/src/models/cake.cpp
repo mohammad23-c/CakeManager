@@ -7,17 +7,23 @@ Cake::Cake()
 {
 }
 
-Cake::Cake(
-    qint64 id,
-    const QString& name,
-    double profitPercentage,
-    const std::vector<CakeIngredient>& ingredients
-    )
-    : m_id(id),
-    m_name(name),
-    m_profitPercentage(profitPercentage),
-    m_ingredients(ingredients)
+Cake::Cake(qint64 id, const QString &name, double profitPercentage, const std::vector<CakeIngredient> &ingredients, const QString &imagePath)
 {
+    m_id = id;
+    m_name = name;
+    m_profitPercentage = profitPercentage;
+    m_ingredients = ingredients;
+    m_imagePath = imagePath;
+}
+
+QString Cake::getImagePath() const
+{
+    return m_imagePath;
+}
+
+void Cake::setImagePath(const QString &imagePath)
+{
+    this->m_imagePath = imagePath;
 }
 
 double Cake::getProfitPercentage() const

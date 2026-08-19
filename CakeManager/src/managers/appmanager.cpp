@@ -406,6 +406,70 @@ std::optional<double> AppManager::calculateCakeCost(qint64 cakeId) const
 
     return sum;
 }
+
+std::optional<double>
+AppManager::calculateCakeCost(
+    qint64 cakeId,
+    double weightKg
+    ) const
+{
+    if (weightKg <= 0)
+    {
+        return std::nullopt;
+    }
+
+    auto cakeWeight = calculateCakeWeight(cakeId);
+
+    if (!cakeWeight.has_value() || *cakeWeight <= 0)
+    {
+        return std::nullopt;
+    }
+
+    auto cakeCost = calculateCakeCost(cakeId);
+
+    if (!cakeCost.has_value())
+    {
+        return std::nullopt;
+    }
+
+
+    double cakeCount =
+        weightKg / *cakeWeight;
+
+    return cakeCount * *cakeCost;
+}
+
+std::optional<double>
+AppManager::calculateCakeFinalPrice(
+    qint64 cakeId,
+    double weightKg
+    ) const
+{
+    std::optional<double> price =
+        calculateCakeCost(cakeId, weightKg);
+
+    if (!price.has_value())
+    {
+        return std::nullopt;
+    }
+
+    std::optional<Cake> c =
+        findCake(cakeId);
+
+    if (!c.has_value())
+    {
+        return std::nullopt;
+    }
+
+    double profit =
+        c->getProfitPercentage();
+
+    double finalPrice =
+        price.value() *
+        (1.0 + (profit / 100.0));
+
+    return finalPrice;
+}
 bool AppManager::containsIngredient(qint64 id) const
 {
     return m_ingredients.find(id) != m_ingredients.end();
@@ -469,6 +533,54 @@ bool AppManager::containsCake(const QString &name, qint64 exceptId) const
     }
 
     return false;
+}
+
+std::optional<double>
+AppManager::calculateCakeWeight(qint64 cakeId) const
+{
+    auto cakeIt = m_cakes.find(cakeId);
+
+    if (cakeIt == m_cakes.end())
+    {
+        return std::nullopt;
+    }
+
+    const Cake& cake = cakeIt->second;
+
+    double totalWeight = 0.0;
+
+    for (const auto& cakeIngredient : cake.getIngredients())
+    {
+        auto ingredientIt =
+            m_ingredients.find(cakeIngredient.ingredientId);
+
+        if (ingredientIt == m_ingredients.end())
+        {
+            return std::nullopt;
+        }
+
+        const Ingredient& ingredient =
+            ingredientIt->second;
+
+        double quantity = cakeIngredient.quantity;
+
+        switch (ingredient.getUnit())
+        {
+        case Ingredient::Unit::Kilogram:
+            totalWeight += quantity * 1000.0;
+            break;
+
+        case Ingredient::Unit::Gram:
+            totalWeight += quantity;
+            break;
+
+        case Ingredient::Unit::Piece:
+            totalWeight += quantity*ingredient.getWeightPerUnit();
+            break;
+        }
+    }
+
+    return totalWeight / 1000.0;
 }
 
 void AppManager::markAsChanged()

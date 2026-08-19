@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
         "Flour",
         Ingredient::Unit::Kilogram,
         50000,
+        0,
         "images/flour.png"
         );
 
@@ -40,6 +41,7 @@ int main(int argc, char *argv[])
         "Chocolate",
         Ingredient::Unit::Kilogram,
         120000,
+        0,
         "images/chocolate.png"
         );
 
@@ -48,6 +50,7 @@ int main(int argc, char *argv[])
         "Cream",
         Ingredient::Unit::Kilogram,
         80000,
+        0,
         "images/cream.png"
         );
 
@@ -77,7 +80,8 @@ int main(int argc, char *argv[])
         0,
         "Chocolate Cake",
         30.0,
-        {}
+        {},
+        ""
         );
 
     cake.addIngredient(flourId, 500);
@@ -156,7 +160,8 @@ int main(int argc, char *argv[])
         cakeId,
         "Big Chocolate Cake",
         40.0,
-        {}
+        {},
+        ""
         );
 
     // Keep flour but change its quantity
@@ -220,7 +225,8 @@ int main(int argc, char *argv[])
         999999,
         "Invalid Cake",
         50.0,
-        {}
+        {},
+        ""
         );
 
     assert(!db.updateCake(invalidCake));

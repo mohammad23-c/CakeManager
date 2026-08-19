@@ -23,6 +23,7 @@ public:
         const QString& name,
         Unit unit,
         qint64 pricePerUnit,
+        qint64 weightPerUnit,
         const QString& imagePath
         );
 
@@ -48,6 +49,10 @@ public:
 
     qint64 getPricePerUnit() const;
     void setPricePerUnit(qint64 pricePerUnit);
+
+
+    void setWeightPerUnit(qint64 gram);
+    qint64 getWeightPerUnit() const;
 //person can add image path for ingredient, this path will be stored in database
     QString getImagePath() const;
     void setImagePath(const QString& imagePath);
@@ -64,6 +69,7 @@ private:
     Unit m_unit;
     qint64 m_pricePerUnit;
     QString m_imagePath;
+    qint64 m_weightPerUnit;
 };
 
 

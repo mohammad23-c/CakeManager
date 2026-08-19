@@ -78,6 +78,20 @@ public:
 
     std::optional<double>
     calculateCakeFinalPrice(qint64 cakeId) const;
+
+    //calculate price with weight
+    std::optional<double>
+    calculateCakeCost(
+        qint64 cakeId,
+        double weightKg
+        ) const;
+
+    std::optional<double>
+    calculateCakeFinalPrice(
+        qint64 cakeId,
+        double weightKg
+        ) const;
+
     //========================================
     // Unsaved Changes
     // ========================================
@@ -103,6 +117,12 @@ public:
      bool containsCake(const QString& name,
                       qint64 exceptId) const;
 
+    //===================
+    //calculate weight
+    //===================
+    //calculate weight of cake return base on kilogram
+     std::optional<double>
+     calculateCakeWeight(qint64 cakeId) const;
 private:
 
     // =========================================

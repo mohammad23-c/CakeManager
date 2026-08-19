@@ -40,6 +40,7 @@ int main(int argc, char *argv[])
         "Flour",
         Ingredient::Unit::Kilogram,
         100000,
+        0,
         ""
         );
 
@@ -48,6 +49,7 @@ int main(int argc, char *argv[])
         "Sugar",
         Ingredient::Unit::Kilogram,
         80000,
+        0,
         ""
         );
 
@@ -56,6 +58,7 @@ int main(int argc, char *argv[])
         "Chocolate",
         Ingredient::Unit::Kilogram,
         250000,
+        0,
         ""
         );
 
@@ -78,7 +81,8 @@ int main(int argc, char *argv[])
         0,
         "Chocolate Cake",
         20.0,
-        chocolateCakeIngredients
+        chocolateCakeIngredients,
+        ""
         );
 
     std::vector<CakeIngredient> sugarCakeIngredients =
@@ -91,7 +95,8 @@ int main(int argc, char *argv[])
         0,
         "Sugar Cake",
         15.0,
-        sugarCakeIngredients
+        sugarCakeIngredients,
+        ""
         );
 
     assert(database.addCake(chocolateCake));
@@ -181,6 +186,7 @@ int main(int argc, char *argv[])
         "Milk",
         Ingredient::Unit::Kilogram,
         60000,
+        0,
         ""
         );
 
@@ -204,6 +210,7 @@ int main(int argc, char *argv[])
         "Milk",
         Ingredient::Unit::Kilogram,
         70000,
+        0,
         ""
         );
 
@@ -231,7 +238,8 @@ int main(int argc, char *argv[])
         0,
         "New Chocolate Cake",
         25.0,
-        newCakeIngredients
+        newCakeIngredients,
+        ""
         );
 
     assert(manager.addCake(newCake));
@@ -250,7 +258,8 @@ int main(int argc, char *argv[])
         0,
         "Invalid Cake",
         20.0,
-        invalidIngredients
+        invalidIngredients,
+        ""
         );
 
     assert(!manager.addCake(invalidCake));
@@ -264,7 +273,8 @@ int main(int argc, char *argv[])
         0,
         "New Chocolate Cake",
         30.0,
-        newCakeIngredients
+        newCakeIngredients,
+        ""
         );
 
     assert(!manager.addCake(duplicateCake));
@@ -326,7 +336,8 @@ int main(int argc, char *argv[])
     // =========================================
     // Test calculateCakeCost
     // =========================================
-
+    //=====================================================================
+    //whit number
     auto cost = manager.calculateCakeCost(chocolateCakeId);
 
     assert(cost.has_value());
@@ -625,12 +636,116 @@ int main(int argc, char *argv[])
             assert(false);
         }
     }
+
+    // =========================================
+    // Calculate Cake Weight Test
+    // =========================================
+
+    Ingredient avocadoX(
+        0,
+        "eggTest",
+        Ingredient::Unit::Piece,
+        5000,
+        50,
+        ""
+        );
+
+    Ingredient thunderMilk(
+        0,
+        "milkTest",
+        Ingredient::Unit::Kilogram,
+        60000,
+        0,
+        ""
+        );
+
+    Ingredient cosmicChocolate(
+        0,
+        "chocolateTest",
+        Ingredient::Unit::Gram,
+        300,
+        0,
+        ""
+        );
+
+    assert(manager.addIngredient(avocadoX));
+    assert(manager.addIngredient(thunderMilk));
+    assert(manager.addIngredient(cosmicChocolate));
+
+    qint64 nebulaEggId =
+        manager.findIngredient("eggTest")->getId();
+
+    qint64 vortexMilkId =
+        manager.findIngredient("milkTest")->getId();
+
+    qint64 pixelChocolateId =
+        manager.findIngredient("chocolateTest")->getId();
+
+    std::vector<CakeIngredient> chaosIngredients =
+        {
+            {nebulaEggId, 3.0},
+            {vortexMilkId, 0.5},
+            {pixelChocolateId, 200.0}
+        };
+
+    Cake quantumCake(
+        0,
+        "Test Cake",
+        25.0,
+        chaosIngredients,
+        ""
+        );
+
+    assert(manager.addCake(quantumCake));
+
+    auto mysteriousCake =
+        manager.findCake("Test Cake");
+
+    assert(mysteriousCake.has_value());
+
+    qint64 forbiddenCakeId =
+        mysteriousCake->getId();
+
+    auto calculatedWeight =
+        manager.calculateCakeWeight(forbiddenCakeId);
+
+    assert(calculatedWeight.has_value());
+    assert(*calculatedWeight == 0.85);
+
+    // =========================================
+    // Test calculateCakeCost with weight
+    // =========================================
+
+    double requestedWeightKg = 1.7;
+
+    auto weightedCost =
+        manager.calculateCakeCost(
+            forbiddenCakeId,
+            requestedWeightKg
+            );
+
+    assert(weightedCost.has_value());
+    assert(*weightedCost == 210000.0);
+
+
+    // =========================================
+    // Test calculateCakeFinalPrice with weight
+    // =========================================
+
+    auto weightedFinalPrice =
+        manager.calculateCakeFinalPrice(
+            forbiddenCakeId,
+            requestedWeightKg
+            );
+
+    assert(weightedFinalPrice.has_value());
+    assert(*weightedFinalPrice == 262500.0);
     // =========================================
     // Check Unsaved Changes
     // =========================================
 
     assert(!loadedManager.hasUnsavedChanges());
     //====================number of run test successfully==================
-    qDebug()<<"test Passed successfully_24";
+    qDebug()<<"test Passed successfully_25";
     return 0;
 }

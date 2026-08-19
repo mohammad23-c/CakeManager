@@ -6,8 +6,8 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
-    QFile::remove("test.db");
-    DatabaseManager database("test.db");
+    QFile::remove("testIngredient.db");
+    DatabaseManager database("testIngredient.db");
 
     // =========================
     // Database
@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
         "Flour",
         Ingredient::Unit::Kilogram,
         50000,
+        0,
         "images/flour.png"
         );
 
@@ -126,6 +127,7 @@ int main(int argc, char *argv[])
         "Super Flour",
         Ingredient::Unit::Kilogram,
         90000,
+        0,
         "images/super_flour.png"
         );
 
