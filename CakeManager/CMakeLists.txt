@@ -41,6 +41,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/ui/MaterialCard/materialdialog.h src/ui/MaterialCard/materialdialog.cpp src/ui/MaterialCard/materialdialog.ui
         src/ui/MaterialCard/addingredientdialog.h src/ui/MaterialCard/addingredientdialog.cpp src/ui/MaterialCard/addingredientdialog.ui
         main.cpp
+        src/utils/validation/inputvalidator.h src/utils/validation/inputvalidator.cpp
+        src/ui/CakeCard/cakecard.h src/ui/CakeCard/cakecard.cpp src/ui/CakeCard/cakecard.ui
     )
 
 else()

@@ -1,5 +1,7 @@
 #include "materialdialog.h"
 #include "ui_materialdialog.h"
+#include "../../utils/validation/inputvalidator.h"
+
 #include <QFileDialog>
 #include <QMessageBox>
 MaterialDialog::MaterialDialog(
@@ -22,7 +24,7 @@ MaterialDialog::MaterialDialog(
         );
     //find ingredient by id
     auto ingredient = m_appManager.findIngredient(m_ingredientId);
-
+    auto inventory= m_appManager.findInventory(m_ingredientId);
     if (!ingredient.has_value())
     {
         QMessageBox::warning(
@@ -38,6 +40,9 @@ MaterialDialog::MaterialDialog(
     //default
     ui->PricepuLineE->setEnabled(false);
     //setText
+    //line edit dialog
+    if(inventory.has_value())
+        ui->lineEditInventory->setText(QString::number(*inventory));
     //name
     ui->NamelineEdit->setText(ingredient->getName());
     //price
@@ -102,31 +107,42 @@ void MaterialDialog::on_choosePicBtn_clicked()
 void MaterialDialog::on_save_clicked()
 {
     //update in with line edits
-    in->setName(ui->NamelineEdit->text());
-    in->setPricePerUnit(ui->PriceLineEdit->text().toDouble());
+        //set name
+    if(!InputValidator::validateLineEdit(ui->NamelineEdit,InputValidator::InputType::NoType)){
+        return;
+    }in->setName(ui->NamelineEdit->text());
+        //set price per unit
+    if(!InputValidator::validateLineEdit(ui->PriceLineEdit,InputValidator::InputType::Double)){
+        return;
+    }in->setPricePerUnit(ui->PriceLineEdit->text().toDouble());
+    //no check
     in->setUnit(static_cast<Ingredient::Unit>(ui->UnitcomboBox->currentIndex()));
+
     if(in->getUnit()==Ingredient::Unit::Piece){
-        if(ui->PricepuLineE->text().isEmpty()){
-            QMessageBox::warning(this,"Weight per unit is empty","Please enter weight per unit");
-            ui->PricepuLineE->setFocus();
-            ui->PricepuLineE->setStyleSheet("border: 1px solid red;");
+        if(!InputValidator::validateLineEdit(ui->PricepuLineE,InputValidator::InputType::Double)){
+            QMessageBox::warning(this,"warning","weight per unit cant empty");
             return;
         }
         in->setWeightPerUnit(ui->PricepuLineE->text().toDouble());
-    }else{
-        in->setWeightPerUnit(0);
     }
+
     //image path already set in on_choosePicBtn_clicked
-
-    if(m_appManager.updateIngredient(*in)){
-
+    if(!InputValidator::validateLineEdit(ui->lineEditInventory,InputValidator::InputType::Double))
+    {
+        return;
+    }
+    double inventory=ui->lineEditInventory->text().toDouble();
+    if(m_appManager.updateIngredient(*in)&&
+        m_appManager.updateInventory(in->getId(),inventory)){
+        m_appManager.inventorySave();
         m_appManager.ingredientSave();
         accept();
         return ;
+    }else{
+        QMessageBox::warning(this,"nameNot uniq","cant update : check name is unique or not");
+        ui->NamelineEdit->setFocus();
+        ui->NamelineEdit->setStyleSheet("border: 1px solid red;");
     }
-    QMessageBox::warning(this,"nameNot uniq","cant update : check name is unique or not");
-    ui->NamelineEdit->setFocus();
-    ui->NamelineEdit->setStyleSheet("border: 1px solid red;");
     return ;
 }
 
