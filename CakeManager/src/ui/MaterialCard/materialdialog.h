@@ -32,6 +32,9 @@ private slots:
 
     void enableWeightLineEdit(int index);
 
+    void on_deleteIngredent_clicked();
+signals:
+    void deleteIng(qint64 ingredientId);
 private:
 
     Ui::MaterialDialog *ui;

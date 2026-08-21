@@ -6,10 +6,8 @@
 #include <QFile>
 #include <QPixmap>
 #include <QMouseEvent>
-
-namespace Ui {
-class MaterialCard;
-}
+class QLabel;
+class QVBoxLayout;
 
 class MaterialCard : public QWidget
 {
@@ -69,8 +67,9 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
 
 private:
-
-    Ui::MaterialCard *ui;
+    QLabel* m_imageLabel;
+    QLabel* m_nameLabel;
+    QVBoxLayout* m_layout;
 
     qint64 m_ingredientId;
 

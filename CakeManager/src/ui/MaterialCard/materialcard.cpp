@@ -1,5 +1,8 @@
 #include "MaterialCard.h"
-#include "ui_MaterialCard.h"
+
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QSizePolicy>
 
 MaterialCard::MaterialCard(
     qint64 ingredientId,
@@ -8,19 +11,36 @@ MaterialCard::MaterialCard(
     QWidget *parent
     )
     : QWidget(parent),
-    ui(new Ui::MaterialCard),
     m_ingredientId(ingredientId),
     m_name(name),
-    m_imagePath(imagePath)
+    m_imagePath(imagePath),
+    m_imageLabel(new QLabel(this)),
+    m_nameLabel(new QLabel(this)),
+    m_layout(new QVBoxLayout(this))
 {
-    ui->setupUi(this);
+    setMinimumSize(220, 280);
+    setMaximumSize(220, 280);
+
+    m_imageLabel->setMinimumSize(200, 220);
+    m_imageLabel->setMaximumSize(200, 220);
+
+    m_imageLabel->setAlignment(Qt::AlignCenter);
+    m_imageLabel->setScaledContents(false);
+
+    m_nameLabel->setAlignment(Qt::AlignCenter);
+
+    m_layout->setContentsMargins(10, 10, 10, 10);
+    m_layout->setSpacing(10);
+
+    m_layout->addWidget(m_imageLabel);
+    m_layout->addWidget(m_nameLabel);
+
     updateImage();
     updateName();
 }
 
 MaterialCard::~MaterialCard()
 {
-    delete ui;
 }
 
 // =========================================
@@ -54,7 +74,7 @@ void MaterialCard::setName(const QString& name)
 
 void MaterialCard::updateName()
 {
-    ui->nameLabel->setText(m_name);
+    m_nameLabel->setText(m_name);
 }
 
 // =========================================
@@ -86,12 +106,12 @@ void MaterialCard::updateImage()
     }
 
     pixmap = pixmap.scaled(
-        ui->imageLabel->size(),
+        m_imageLabel->size(),
         Qt::KeepAspectRatio,
         Qt::SmoothTransformation
         );
 
-    ui->imageLabel->setPixmap(pixmap);
+    m_imageLabel->setPixmap(pixmap);
 }
 
 void MaterialCard::updateCard(
@@ -117,5 +137,6 @@ void MaterialCard::mousePressEvent(QMouseEvent *event)
 void MaterialCard::resizeEvent(QResizeEvent *event)
 {
     QWidget::resizeEvent(event);
+
     updateImage();
 }

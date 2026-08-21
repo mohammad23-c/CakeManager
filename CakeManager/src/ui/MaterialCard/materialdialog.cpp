@@ -143,3 +143,30 @@ void MaterialDialog::enableWeightLineEdit(int index)
         );
 }
 
+
+void MaterialDialog::on_deleteIngredent_clicked()
+{
+    QMessageBox::StandardButton result =
+        QMessageBox::question(
+            this,
+            "Delete Ingredient",
+            "Are you sure you want to delete this ingredient?",
+            QMessageBox::Yes | QMessageBox::No
+            );
+    if(result==QMessageBox::Yes){
+        bool s=m_appManager.deleteIngredient(m_ingredientId);
+        if(!s){
+            QMessageBox::warning(
+                this,
+                "Cannot Delete Ingredient",
+                "This ingredient is used in a cake and cannot be deleted."
+                );
+            return ;
+        }
+        m_appManager.ingredientSave();
+        emit deleteIng(m_ingredientId);
+        accept();
+    }
+    return ;
+}
+
