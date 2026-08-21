@@ -77,8 +77,13 @@ public:
 
     // Gets all ingredients from the database.
     std::vector<Ingredient> getIngredients();
-
-
+    //===================
+    //inventory
+    //===================
+    bool addInventory(qint64 ingredientId, double quantity);
+    bool updateInventory(qint64 ingredientId, double quantity);
+    bool deleteInventory(qint64 ingredientId);
+    std::unordered_map<qint64, double> getInventoryMap();
     //===========================================================================
     // Daily functions
     //===========================================================================

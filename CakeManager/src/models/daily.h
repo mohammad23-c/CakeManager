@@ -59,6 +59,8 @@ public:
 
     void setSummary(const DailySummary& summary);
 
+    void setId(qint64 id);
+
     // =========================================
     // Cake Management
     // =========================================
@@ -89,6 +91,7 @@ private:
     std::vector<DailyCake> m_cakes;
 
     DailySummary m_summary;
+
 };
 
 

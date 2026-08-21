@@ -5,6 +5,7 @@
 #include <optional>
 #include <vector>
 
+#include "../models/daily.h"
 #include "../models/ingredient.h"
 #include "../models/cake.h"
 #include "../database/DatabaseManager.h"
@@ -31,6 +32,7 @@ public:
     bool save();
     bool ingredientSave();
     bool cakeSave();
+    bool dailySave();
     // =========================================
     // Ingredient
     // =========================================
@@ -68,7 +70,31 @@ public:
     std::vector<qint64>
     getCakesUsingIngredient(qint64 ingredientId) const;
 
+    // =========================================
+    // Daily
+    // =========================================
 
+    bool addDaily(const Daily& daily);
+
+    bool updateDaily(const Daily& daily);
+
+    bool deleteDaily(qint64 id);
+
+    std::optional<Daily> findDaily(qint64 id) const;
+    std::optional<Daily> findDaily(const QDate& date) const;
+
+    std::vector<Daily> getDailies() const;
+
+    bool addCakeToDaily(
+        qint64 dailyId,
+        qint64 cakeId,
+        double quantity,
+        bool quantityIsWeight
+        );
+    bool removeCakeFromDaily(
+        qint64 dailyId,
+        qint64 cakeId
+        );
     // =========================================
     // Price
     // =========================================
@@ -117,12 +143,53 @@ public:
      bool containsCake(const QString& name,
                       qint64 exceptId) const;
 
+    //daily
+     bool containsDaily(const QDate& date) const;
+     bool containsDaily(
+         const QDate& date,
+         qint64 exceptId
+         ) const;
     //===================
     //calculate weight
     //===================
     //calculate weight of cake return base on kilogram
      std::optional<double>
      calculateCakeWeight(qint64 cakeId) const;
+
+    //=================
+    //calculate daily summary
+    //=================
+    DailySummary calculateDailySummary(const Daily& daily) const;
+    //======================
+    //date
+    //==========================
+    QDate getCurrentDate() const;
+    // =========================================
+    // Inventory
+    // =========================================
+
+    bool addInventory(
+        qint64 ingredientId,
+        double quantity
+        );
+
+    bool updateInventory(
+        qint64 ingredientId,
+        double quantity
+        );
+
+    bool deleteInventory(qint64 ingredientId);
+
+    std::optional<double>
+    findInventory(qint64 ingredientId) const;
+
+    bool containsInventory(qint64 ingredientId) const;
+
+    bool inventorySave();
+    //==================
+    //GETTERS
+    //==================
+    std::vector<Ingredient> getIngredients() const;
 private:
 
     // =========================================
@@ -142,8 +209,14 @@ private:
 
     std::unordered_map<qint64, Cake> m_cakes;
 
+    std::unordered_map<qint64, Daily> m_dailies;
+
+    std::unordered_map<qint64, double> m_inventory;
+
+
     qint64 m_nextIngredientId=1;
     qint64 m_nextCakeId=1;
+    qint64 m_nextDailyId =1;
     // =========================================
     // Unsaved Changes
     // ========================================
@@ -151,6 +224,7 @@ private:
     bool m_hasUnsavedChanges=false;
     //this func call when any changes happend in app without saving to database this func will set m_hasUnsavedChanges to true
     void markAsChanged();
+
 };
 
 #endif // APPMANAGER_H

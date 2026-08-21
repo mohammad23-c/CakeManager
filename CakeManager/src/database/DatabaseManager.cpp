@@ -58,8 +58,23 @@ bool DatabaseManager::createTables()
 
         return false;
     }
+    //ingredient inventory
+    if (!query.exec(R"(
+    CREATE TABLE IF NOT EXISTS inventory (
+        ingredient_id INTEGER PRIMARY KEY,
+        quantity REAL NOT NULL,
 
+        FOREIGN KEY (ingredient_id)
+            REFERENCES ingredients(id)
+            ON DELETE CASCADE
+    )
+)"))
+    {
+        qDebug() << "Inventory table creation error:"
+                 << query.lastError().text();
 
+        return false;
+    }
     // =========================================
     // Cake table
     // =========================================
@@ -733,6 +748,113 @@ std::vector<Ingredient> DatabaseManager::getIngredients()
     return ingredients;
 }
 
+bool DatabaseManager::addInventory(
+    qint64 ingredientId,
+    double quantity
+    )
+{
+    QSqlQuery query(m_database);
+
+    query.prepare(R"(
+        INSERT INTO inventory
+        (ingredient_id, quantity)
+        VALUES (:ingredientId, :quantity)
+    )");
+
+    query.bindValue(":ingredientId", ingredientId);
+    query.bindValue(":quantity", quantity);
+
+    if (!query.exec())
+    {
+        qDebug() << "Failed to add inventory:"
+                 << query.lastError().text();
+
+        return false;
+    }
+
+    return true;
+}
+
+bool DatabaseManager::updateInventory(
+    qint64 ingredientId,
+    double quantity
+    )
+{
+    QSqlQuery query(m_database);
+
+    query.prepare(R"(
+        UPDATE inventory
+        SET quantity = :quantity
+        WHERE ingredient_id = :ingredientId
+    )");
+
+    query.bindValue(":ingredientId", ingredientId);
+    query.bindValue(":quantity", quantity);
+
+    if (!query.exec())
+    {
+        qDebug() << "Failed to update inventory:"
+                 << query.lastError().text();
+
+        return false;
+    }
+
+    return query.numRowsAffected() > 0;
+}
+
+bool DatabaseManager::deleteInventory(qint64 ingredientId)
+{
+    QSqlQuery query(m_database);
+
+    query.prepare(R"(
+        DELETE FROM inventory
+        WHERE ingredient_id = :ingredientId
+    )");
+
+    query.bindValue(":ingredientId", ingredientId);
+
+    if (!query.exec())
+    {
+        qDebug() << "Failed to delete inventory:"
+                 << query.lastError().text();
+
+        return false;
+    }
+
+    return query.numRowsAffected() > 0;
+}
+
+std::unordered_map<qint64, double>
+DatabaseManager::getInventoryMap()
+{
+    std::unordered_map<qint64, double> inventory;
+
+    QSqlQuery query(m_database);
+
+    if (!query.exec(R"(
+        SELECT ingredient_id, quantity
+        FROM inventory
+    )"))
+    {
+        qDebug() << "Failed to get inventory:"
+                 << query.lastError().text();
+
+        return inventory;
+    }
+
+    while (query.next())
+    {
+        qint64 ingredientId =
+            query.value("ingredient_id").toLongLong();
+
+        double quantity =
+            query.value("quantity").toDouble();
+
+        inventory.emplace(ingredientId, quantity);
+    }
+
+    return inventory;
+}
 std::optional<Daily>
 DatabaseManager::findDaily(qint64 id)
 {

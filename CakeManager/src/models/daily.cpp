@@ -72,6 +72,11 @@ void Daily::setSummary(const DailySummary& summary)
     m_summary = summary;
 }
 
+void Daily::setId(qint64 id)
+{
+    this->m_id=id;
+}
+
 // =========================================
 // Cake Management
 // =========================================

@@ -35,8 +35,12 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/database/DatabaseManager.h
         src/database/DatabaseManager.cpp
         src/managers/appmanager.h src/managers/appmanager.cpp
-        tests/testAppManager.cpp
         src/models/daily.h src/models/daily.cpp
+        src/ui/MaterialCard/materialcard.h src/ui/MaterialCard/materialcard.cpp src/ui/MaterialCard/materialcard.ui
+        resources/resources.qrc
+        src/ui/MaterialCard/materialdialog.h src/ui/MaterialCard/materialdialog.cpp src/ui/MaterialCard/materialdialog.ui
+        src/ui/MaterialCard/addingredientdialog.h src/ui/MaterialCard/addingredientdialog.cpp src/ui/MaterialCard/addingredientdialog.ui
+        main.cpp
     )
 
 else()
@@ -164,6 +168,32 @@ target_link_libraries(testDaily PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Sql
 )
+# =========================
+# appmanager test
+# =========================
+add_executable(appManagerDailyTest
+
+    tests/appManagerDaily.cpp
+
+    src/models/ingredient.h
+    src/models/ingredient.cpp
+
+    src/models/cake.h src/models/cake.cpp
+
+    src/database/DatabaseManager.h
+    src/database/DatabaseManager.cpp
+
+    src/models/daily.h
+    src/models/daily.cpp
+
+    src/managers/appmanager.h
+    src/managers/appmanager.cpp
+)
+target_link_libraries(appManagerDailyTest PRIVATE
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Sql
+)
+
 # =========================
 # Application Properties
 # =========================
