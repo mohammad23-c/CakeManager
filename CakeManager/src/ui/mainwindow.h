@@ -34,20 +34,48 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
 
+    //============================================
+    //ingredients
+    //============================================
+
     //load all ingredient and show in page ingredient
     void loadIngredients();
     void loadNewIngredientCard(qint64 id);
     void updateCard(qint64 ingredientId);
     void createIngredientPage();
+    //find ingredient card by its name
+    std::vector<qint64> findIngredientsByName(
+        const QString& searchText
+        ) const;
+    //clear page but not cardsMap
+    void clearIngredientGrid();
+    //load cakes that be in the vector
+    void loadIngredientCards(const std::vector<qint64>& ingredientIds);
 
+    //=================================================================
+    //cakes
+    //=================================================================
     //load all cake and show in page cake
     void createCakePage();
     void loadCakes();
     void loadNewCakeCard(qint64 id);
     void updateCakeCard(qint64 id);
+    // find cake card by its name
+    std::vector<qint64> findCakesByName(
+        const QString& searchText
+        ) const;
 
+    // clear page but not cardsMap
+    void clearCakeGrid();
 
+    // load cakes that be in the vector
+    void loadCakeCards(
+        const std::vector<qint64>& cakeIds
+        );
 
+    //=================================================================
+    //daily
+    //=================================================================
     //load all cake and show page date
     void createDailyPage();
     void loadCurrentDaily();
@@ -83,7 +111,7 @@ private slots:
     void createCakeEditDialog(qint64 cakeId);
     void on_addCakeButton_clicked();
     void deleteCakeCard(qint64 cakeId);
-
+    //add dialog push btn
     void on_pushButton_clicked();
 
 
@@ -93,6 +121,9 @@ private slots:
     void onAddDailyCakeClicked();
 
 
+    //search lines
+    void onIngredientSearchChanged(const QString& text);
+    void onCakeSearchChanged(const QString& text);
 
 private:
     Ui::MainWindow *ui;
@@ -108,12 +139,14 @@ private:
     QWidget* m_ingredientContent;
     QGridLayout* m_ingredientGrid;
     QPushButton* m_addIngredientButton;
+    QLineEdit* m_ingredientSearch;
 
     // Cakes page
     QScrollArea* m_cakeScrollArea;
     QWidget* m_cakeContent;
     QGridLayout* m_cakeGrid;
     QPushButton* m_addCakeButton;
+    QLineEdit* m_cakeSearch;
 
     // Daily page
     QDateEdit* m_dailyDateEdit;

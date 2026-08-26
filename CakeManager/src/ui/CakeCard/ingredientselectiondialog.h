@@ -12,6 +12,7 @@
 
 #include "../../managers/appmanager.h"
 #include "../MaterialCard/materialcard.h"
+#include <QLineEdit>
 
 namespace Ui {
 class IngredientSelectionDialog;
@@ -36,7 +37,31 @@ public:
         QWidget* parent = nullptr
         );
 
+    // =========================================
+    // Search
+    // =========================================
+
+    std::vector<qint64> findIngredientsByName(
+        const QString& searchText
+        ) const;
+
+
+    void clearIngredientGrid();
+
+
+    void loadIngredientCards(
+        const std::vector<qint64>& ingredientIds
+        );
+
+
+
     ~IngredientSelectionDialog();
+
+private slots:
+
+    void onSearchTextChanged(
+        const QString& text
+        );
 
 private:
 
@@ -96,6 +121,9 @@ private:
         qint64,
         IngredientSelectionItem
         > m_ingredientItems;
+
+    // Search
+    QLineEdit* m_searchLineEdit;
 };
 
 #endif // INGREDIENTSELECTIONDIALOG_H

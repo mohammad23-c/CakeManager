@@ -114,7 +114,10 @@ void MainWindow::createIngredientPage()
     QWidget* ingredientsPage =
         ui->stackedWidget->widget(IngredientsPage);
 
-    // Main layout
+    // =========================================
+    // Main Layout
+    // =========================================
+
     auto* ingredientsLayout =
         new QVBoxLayout(ingredientsPage);
 
@@ -124,7 +127,60 @@ void MainWindow::createIngredientPage()
 
     ingredientsLayout->setSpacing(0);
 
+    // =========================================
+    // Top Layout
+    // =========================================
+
+    auto* topLayout =
+        new QHBoxLayout;
+
+    // Search
+    m_ingredientSearch =
+        new QLineEdit(ingredientsPage);
+
+    m_ingredientSearch->setPlaceholderText(
+        "Search"
+        );
+
+    m_ingredientSearch->setFixedHeight(40);
+
+    // Add Button
+    m_addIngredientButton =
+        new QPushButton(
+            "Add Ingredient",
+            ingredientsPage
+            );
+
+    m_addIngredientButton->setFixedHeight(40);
+
+    connect(
+        m_addIngredientButton,
+        &QPushButton::clicked,
+        this,
+        &MainWindow::on_pushButton_clicked
+        );
+
+    // =========================================
+    // Top Layout
+    // =========================================
+
+    topLayout->addWidget(
+        m_ingredientSearch,
+        1
+        );
+
+    topLayout->addWidget(
+        m_addIngredientButton
+        );
+
+    ingredientsLayout->addLayout(
+        topLayout
+        );
+
+    // =========================================
     // Scroll Area
+    // =========================================
+
     m_ingredientScrollArea =
         new QScrollArea(ingredientsPage);
 
@@ -138,11 +194,17 @@ void MainWindow::createIngredientPage()
         Qt::ScrollBarAsNeeded
         );
 
+    // =========================================
     // Content Widget
+    // =========================================
+
     m_ingredientContent =
         new QWidget();
 
+    // =========================================
     // Grid
+    // =========================================
+
     m_ingredientGrid =
         new QGridLayout(m_ingredientContent);
 
@@ -153,35 +215,97 @@ void MainWindow::createIngredientPage()
     m_ingredientGrid->setHorizontalSpacing(15);
     m_ingredientGrid->setVerticalSpacing(15);
 
-    // Set content
+    // =========================================
+    // Set Content
+    // =========================================
+
     m_ingredientScrollArea->setWidget(
         m_ingredientContent
         );
 
-    //add btn
-    auto* topLayout = new QHBoxLayout;
+    // =========================================
+    // Add Scroll Area
+    // =========================================
 
-    m_addIngredientButton =
-        new QPushButton("Add Ingredient", ingredientsPage);
-
-    m_addIngredientButton->setFixedHeight(40);
-
-    connect(
-        m_addIngredientButton,
-        &QPushButton::clicked,
-        this,
-        &MainWindow::on_pushButton_clicked
-        );
-
-
-    topLayout->addStretch();
-    topLayout->addWidget(m_addIngredientButton);
-
-    ingredientsLayout->addLayout(topLayout);
-    // Add scroll area to page
     ingredientsLayout->addWidget(
         m_ingredientScrollArea
         );
+
+
+    //connect search line to its slot
+    connect(
+        m_ingredientSearch,
+        &QLineEdit::textChanged,
+        this,
+        &MainWindow::onIngredientSearchChanged
+        );
+}
+
+std::vector<qint64> MainWindow::findIngredientsByName(
+    const QString& searchText
+    ) const
+{
+    std::vector<qint64> result;
+
+    for (const auto& [ingredientId, card] : m_materialCards)
+    {
+        if (card->getName().contains(
+                searchText,
+                Qt::CaseInsensitive
+                ))
+        {
+            result.push_back(ingredientId);
+        }
+    }
+
+    return result;
+}
+
+void MainWindow::clearIngredientGrid()
+{
+    while (QLayoutItem* item = m_ingredientGrid->takeAt(0))
+    {
+        if (QWidget* widget = item->widget())
+        {
+            widget->hide();
+        }
+
+        delete item;
+    }
+}
+
+void MainWindow::loadIngredientCards(
+    const std::vector<qint64>& ingredientIds
+    )
+{
+    int index = 0;
+
+    for (qint64 ingredientId : ingredientIds)
+    {
+        auto it =
+            m_materialCards.find(ingredientId);
+
+        if (it == m_materialCards.end())
+        {
+            continue;
+        }
+
+        MaterialCard* card =
+            it->second;
+
+        int row = index / 4;
+        int column = index % 4;
+
+        m_ingredientGrid->addWidget(
+            card,
+            row,
+            column
+            );
+
+        card->show();
+
+        ++index;
+    }
 }
 
 void MainWindow::createCakePage()
@@ -255,6 +379,17 @@ void MainWindow::createCakePage()
     auto* topLayout =
         new QHBoxLayout;
 
+    // Search
+    m_cakeSearch =
+        new QLineEdit(cakesPage);
+
+    m_cakeSearch->setPlaceholderText(
+        "Search"
+        );
+
+    m_cakeSearch->setFixedHeight(40);
+
+    // Add Cake Button
     m_addCakeButton =
         new QPushButton(
             "Add Cake",
@@ -270,7 +405,15 @@ void MainWindow::createCakePage()
         &MainWindow::on_addCakeButton_clicked
         );
 
-    topLayout->addStretch();
+    // =========================================
+    // Top Layout
+    // =========================================
+
+    topLayout->addWidget(
+        m_cakeSearch,
+        1
+        );
+
     topLayout->addWidget(
         m_addCakeButton
         );
@@ -285,6 +428,14 @@ void MainWindow::createCakePage()
 
     cakesLayout->addWidget(
         m_cakeScrollArea
+        );
+
+    //conncet cake search box to its slot
+    connect(
+        m_cakeSearch,
+        &QLineEdit::textChanged,
+        this,
+        &MainWindow::onCakeSearchChanged
         );
 }
 
@@ -355,6 +506,80 @@ void MainWindow::updateCakeCard(qint64 cakeId)
         cake->getName(),
         cake->getImagePath()
         );
+}
+
+std::vector<qint64> MainWindow::findCakesByName(
+    const QString& searchText
+    ) const
+{
+    std::vector<qint64> result;
+
+    QString text =
+        searchText.trimmed();
+
+    for (const auto& [id, card] : m_cakeCards)
+    {
+        if (card->getName()
+                .contains(
+                    text,
+                    Qt::CaseInsensitive
+                    ))
+        {
+            result.push_back(id);
+        }
+    }
+
+    return result;
+}
+
+void MainWindow::clearCakeGrid()
+{
+    while (QLayoutItem* item = m_cakeGrid->takeAt(0))
+    {
+        if (QWidget* widget = item->widget())
+        {
+            widget->hide();
+        }
+
+        delete item;
+    }
+}
+
+void MainWindow::loadCakeCards(
+    const std::vector<qint64>& cakeIds
+    )
+{
+    int index = 0;
+
+    for (qint64 cakeId : cakeIds)
+    {
+        auto it =
+            m_cakeCards.find(cakeId);
+
+        if (it == m_cakeCards.end())
+        {
+            continue;
+        }
+
+        CakeCard* card =
+            it->second;
+
+        int row =
+            index / 4;
+
+        int column =
+            index % 4;
+
+        m_cakeGrid->addWidget(
+            card,
+            row,
+            column
+            );
+
+        card->show();
+
+        ++index;
+    }
 }
 
 void MainWindow::createDailyPage()
@@ -729,6 +954,34 @@ void MainWindow::onAddDailyCakeClicked()
     loadCurrentDaily();
 }
 
+void MainWindow::onIngredientSearchChanged(
+    const QString& text
+    )
+{
+    auto ingredientIds =
+        findIngredientsByName(text);
+
+    clearIngredientGrid();
+
+    loadIngredientCards(
+        ingredientIds
+        );
+}
+
+void MainWindow::onCakeSearchChanged(
+    const QString& text
+    )
+{
+    auto cakeIds =
+        findCakesByName(text);
+
+    clearCakeGrid();
+
+    loadCakeCards(
+        cakeIds
+        );
+}
+
 void MainWindow::loadCurrentDaily()
 {
     // Remove cards from previous date
@@ -804,7 +1057,6 @@ void MainWindow::saveCurrentDaily()
     m_appManager.updateDaily(
         m_currentDaily
         );
-
     m_appManager.save();
 }
 

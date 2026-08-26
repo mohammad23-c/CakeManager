@@ -31,6 +31,8 @@ private slots:
     void on_pushButton_2_clicked();
 
     void enableWeightLineEdit(int index);
+    //
+    void setLabelUnit(int index);
 
     void on_deleteIngredent_clicked();
 signals:

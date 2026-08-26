@@ -78,6 +78,18 @@ void Ingredient::setImagePath(const QString& imagePath)
     m_imagePath = imagePath;
 }
 
+Ingredient::Unit Ingredient::indexToUnit(int index)
+{
+    if(index==0)
+        return Unit::Gram;
+    if(index=1)
+        return Unit::Kilogram;
+    if(index==2)
+        return Unit::Piece;
+
+    return Unit::Kilogram;
+}
+
 QString Ingredient::unitToString(Unit u)
 {
     switch (u)

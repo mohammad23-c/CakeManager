@@ -29,6 +29,8 @@ private slots:
 
     void enableWeightPerUnitLineEdit(int index);
 
+    void setLabelUnit(int index);
+
 private:
 
     Ui::AddIngredientDialog *ui;

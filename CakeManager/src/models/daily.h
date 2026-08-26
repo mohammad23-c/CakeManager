@@ -15,8 +15,8 @@ struct DailyCake
 
 struct DailySummary
 {
-    double totalCost;
-    double totalSales;
+    double totalCost=0.0;
+    double totalSales=0.0;
 };
 
 class Daily

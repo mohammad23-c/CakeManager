@@ -56,7 +56,7 @@
    <property name="geometry">
     <rect>
      <x>90</x>
-     <y>210</y>
+     <y>200</y>
      <width>101</width>
      <height>31</height>
     </rect>
@@ -69,7 +69,7 @@
    <property name="geometry">
     <rect>
      <x>80</x>
-     <y>280</y>
+     <y>290</y>
      <width>191</width>
      <height>20</height>
     </rect>
@@ -114,8 +114,8 @@
   <widget class="QLineEdit" name="lineEditweightPer">
    <property name="geometry">
     <rect>
-     <x>220</x>
-     <y>210</y>
+     <x>200</x>
+     <y>200</y>
      <width>113</width>
      <height>28</height>
     </rect>
@@ -134,7 +134,7 @@
   <widget class="QComboBox" name="comboBoxunit">
    <property name="geometry">
     <rect>
-     <x>200</x>
+     <x>190</x>
      <y>140</y>
      <width>101</width>
      <height>28</height>
@@ -214,14 +214,27 @@
   <widget class="QLabel" name="label_7">
    <property name="geometry">
     <rect>
-     <x>350</x>
-     <y>210</y>
+     <x>330</x>
+     <y>200</y>
      <width>71</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
     <string>kiloogram</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="showUnit">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>280</y>
+     <width>63</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>----</string>
    </property>
   </widget>
  </widget>

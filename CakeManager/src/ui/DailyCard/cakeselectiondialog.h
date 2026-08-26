@@ -6,7 +6,8 @@
 #include <QScrollArea>
 #include <QGridLayout>
 #include <QVBoxLayout>
-
+#include <QLineEdit>
+#include <QHBoxLayout>
 #include <unordered_map>
 
 #include "../../managers/appmanager.h"
@@ -15,7 +16,7 @@
 namespace Ui {
 class CakeSelectionDialog;
 }
-
+class QLineEdit;
 // =========================================
 // Cake Selection Item
 // =========================================
@@ -38,8 +39,25 @@ public:
         QWidget* parent = nullptr
         );
     qint64 getSelectedCakeId() const;
-    ~CakeSelectionDialog();
 
+    //search
+    std::vector<qint64> findCakesByName(
+        const QString& searchText
+        ) const;
+
+
+    void clearCakeGrid();
+
+
+    void loadCakeCards(
+        const std::vector<qint64>& cakeIds
+        );
+
+    ~CakeSelectionDialog();
+private slots:
+    void onSearchTextChanged(
+    const QString& text
+    );
 private:
 
     // =========================================
@@ -90,6 +108,7 @@ private:
 
     QGridLayout* m_cakeGrid;
 
+    QLineEdit* m_searchLineEdit;
     // =========================================
     // Cake Items
     // =========================================
@@ -104,6 +123,8 @@ private:
     // =========================================
 
     qint64 m_selectedCakeId;
+
+
 };
 
 #endif // CAKESELECTIONDIALOG_H

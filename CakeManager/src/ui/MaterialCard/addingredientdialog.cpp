@@ -16,7 +16,12 @@ AddIngredientDialog::AddIngredientDialog(AppManager &appManager, QWidget *parent
         this,
         &AddIngredientDialog::enableWeightPerUnitLineEdit
         );
-
+    connect(
+         ui->comboBoxunit,
+        QOverload<int>::of(&QComboBox::currentIndexChanged),
+        this,
+        &AddIngredientDialog::setLabelUnit
+        );
     in = Ingredient(
         0,
         "",
@@ -26,6 +31,8 @@ AddIngredientDialog::AddIngredientDialog(AppManager &appManager, QWidget *parent
         ""
         );
     id=0;
+    ui->showUnit->setText(Ingredient::unitToString(Ingredient::indexToUnit(1)));
+
 }
 
 void AddIngredientDialog::updateImage()
@@ -201,5 +208,23 @@ void AddIngredientDialog::enableWeightPerUnitLineEdit(int index)
     ui->lineEditweightPer->setEnabled(
         index == static_cast<int>(Ingredient::Unit::Piece)
         );
+}
+
+void AddIngredientDialog::setLabelUnit(int index)
+{
+    switch(index){
+    case 0:
+        ui->showUnit->setText("kilogram");
+        break;
+    case 1:
+        ui->showUnit->setText("gram");
+        break;
+    case 2:
+        ui->showUnit->setText("piece");
+        break;
+    default:
+        ui->showUnit->setText("?");
+        break;
+    }
 }
 

@@ -22,6 +22,12 @@ MaterialDialog::MaterialDialog(
         this,
         &MaterialDialog::enableWeightLineEdit
         );
+    connect(
+        ui->UnitcomboBox,
+        QOverload<int>::of(&QComboBox::currentIndexChanged),
+        this,
+        &MaterialDialog::setLabelUnit
+        );
     //find ingredient by id
     auto ingredient = m_appManager.findIngredient(m_ingredientId);
     auto inventory= m_appManager.findInventory(m_ingredientId);
@@ -40,6 +46,8 @@ MaterialDialog::MaterialDialog(
     //default
     ui->PricepuLineE->setEnabled(false);
     //setText
+    //set show unit
+    ui->showUnit->setText(Ingredient::unitToString(Ingredient::indexToUnit(1)));
     //line edit dialog
     if(inventory.has_value())
         ui->lineEditInventory->setText(QString::number(*inventory));
@@ -159,6 +167,23 @@ void MaterialDialog::enableWeightLineEdit(int index)
         );
 }
 
+void MaterialDialog::setLabelUnit(int index)
+{
+    switch(index){
+    case 0:
+        ui->showUnit->setText("kilogram");
+        break;
+    case 1:
+        ui->showUnit->setText("gram");
+        break;
+    case 2:
+        ui->showUnit->setText("piece");
+        break;
+    default:
+        ui->showUnit->setText("?");
+        break;
+    }
+}
 
 void MaterialDialog::on_deleteIngredent_clicked()
 {

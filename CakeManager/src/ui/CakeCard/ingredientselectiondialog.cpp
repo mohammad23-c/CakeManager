@@ -14,18 +14,72 @@ IngredientSelectionDialog::IngredientSelectionDialog(
     m_cakeIngredients(cakeIngredients),
     m_ingredientScrollArea(nullptr),
     m_ingredientContent(nullptr),
-    m_ingredientGrid(nullptr)
+    m_ingredientGrid(nullptr),
+    m_searchLineEdit(nullptr)
 {
     setWindowTitle("Select Ingredients");
+
+    // Dialog Size
+    resize(
+        900,
+        700
+        );
+
 
     // =========================================
     // Main Layout
     // =========================================
 
-    auto* mainLayout = new QVBoxLayout(this);
+    auto* mainLayout =
+        new QVBoxLayout(this);
 
-    mainLayout->setContentsMargins(0, 0, 0, 0);
-    mainLayout->setSpacing(0);
+    mainLayout->setContentsMargins(
+        0,
+        0,
+        0,
+        0
+        );
+
+    mainLayout->setSpacing(5);
+
+
+    // =========================================
+    // Search Line Edit
+    // =========================================
+
+    m_searchLineEdit =
+        new QLineEdit(this);
+
+    m_searchLineEdit->setPlaceholderText(
+        "Search..."
+        );
+
+    m_searchLineEdit->setFixedHeight(
+        40
+        );
+
+    connect(
+        m_searchLineEdit,
+        &QLineEdit::textChanged,
+        this,
+        &IngredientSelectionDialog::onSearchTextChanged
+        );
+
+    auto* searchLayout = new QHBoxLayout;
+
+    searchLayout->addWidget(
+        m_searchLineEdit,
+        3
+        );
+
+    searchLayout->addStretch(
+        1
+        );
+
+    mainLayout->addLayout(
+        searchLayout
+        );
+
 
     // =========================================
     // Scroll Area
@@ -34,7 +88,9 @@ IngredientSelectionDialog::IngredientSelectionDialog(
     m_ingredientScrollArea =
         new QScrollArea(this);
 
-    m_ingredientScrollArea->setWidgetResizable(true);
+    m_ingredientScrollArea->setWidgetResizable(
+        true
+        );
 
     m_ingredientScrollArea->setHorizontalScrollBarPolicy(
         Qt::ScrollBarAsNeeded
@@ -44,6 +100,7 @@ IngredientSelectionDialog::IngredientSelectionDialog(
         Qt::ScrollBarAsNeeded
         );
 
+
     // =========================================
     // Content Widget
     // =========================================
@@ -51,20 +108,34 @@ IngredientSelectionDialog::IngredientSelectionDialog(
     m_ingredientContent =
         new QWidget();
 
+
     // =========================================
     // Grid
     // =========================================
 
     m_ingredientGrid =
-        new QGridLayout(m_ingredientContent);
+        new QGridLayout(
+            m_ingredientContent
+            );
 
     m_ingredientGrid->setContentsMargins(
-        15, 15, 15, 15
+        15,
+        15,
+        15,
+        15
         );
 
-    m_ingredientGrid->setHorizontalSpacing(15);
-    m_ingredientGrid->setVerticalSpacing(15);
+    m_ingredientGrid->setHorizontalSpacing(
+        15
+        );
 
+    m_ingredientGrid->setVerticalSpacing(
+        15
+        );
+
+    m_ingredientGrid->setAlignment(
+        Qt::AlignTop
+        );
     // =========================================
     // Set Scroll Content
     // =========================================
@@ -73,9 +144,11 @@ IngredientSelectionDialog::IngredientSelectionDialog(
         m_ingredientContent
         );
 
+
     mainLayout->addWidget(
         m_ingredientScrollArea
         );
+
 
     // =========================================
     // Load Ingredients
@@ -84,10 +157,116 @@ IngredientSelectionDialog::IngredientSelectionDialog(
     loadIngredients();
 }
 
+std::vector<qint64>
+IngredientSelectionDialog::findIngredientsByName(
+    const QString& searchText
+    ) const
+{
+    std::vector<qint64> result;
+
+    QString text =
+        searchText.trimmed()
+            .toLower();
+
+
+    for (const auto& pair : m_ingredientItems)
+    {
+        qint64 id = pair.first;
+
+        auto ingredient =
+            m_appManager.findIngredient(id);
+
+
+        if (!ingredient.has_value())
+        {
+            continue;
+        }
+
+
+        QString name =
+            ingredient->getName()
+                .toLower();
+
+
+        if (text.isEmpty() ||
+            name.contains(text))
+        {
+            result.push_back(id);
+        }
+    }
+
+    return result;
+}
+
+void IngredientSelectionDialog::clearIngredientGrid()
+{
+    while(m_ingredientGrid->count() > 0)
+    {
+        QLayoutItem* item =
+            m_ingredientGrid->takeAt(0);
+
+        if(item->widget())
+        {
+            item->widget()->setParent(nullptr);
+        }
+
+        delete item;
+    }
+}
+
+void IngredientSelectionDialog::loadIngredientCards(
+    const std::vector<qint64>& ingredientIds
+    )
+{
+    for(qint64 id : ingredientIds)
+    {
+        auto item =
+            m_ingredientItems.find(id);
+
+
+        if(item == m_ingredientItems.end())
+        {
+            continue;
+        }
+
+
+        int index =
+            m_ingredientGrid->count();
+
+
+        int row =
+            index / 4;
+
+
+        int column =
+            index % 4;
+
+
+        m_ingredientGrid->addWidget(
+            item->second.container,
+            row,
+            column
+            );
+    }
+}
+
 IngredientSelectionDialog::~IngredientSelectionDialog()
 {
 }
 
+void IngredientSelectionDialog::onSearchTextChanged(
+    const QString& text
+    )
+{
+    auto ids =
+        findIngredientsByName(text);
+
+
+    clearIngredientGrid();
+
+
+    loadIngredientCards(ids);
+}
 // =========================================
 // Load Ingredients
 // =========================================
@@ -128,6 +307,11 @@ void IngredientSelectionDialog::loadIngredientCard(
     auto* container =
         new QWidget(m_ingredientContent);
 
+    container->setSizePolicy(
+        QSizePolicy::Fixed,
+        QSizePolicy::Fixed
+        );
+
     auto* layout =
         new QVBoxLayout(container);
 
@@ -149,6 +333,10 @@ void IngredientSelectionDialog::loadIngredientCard(
             container
             );
 
+    card->setSizePolicy(
+        QSizePolicy::Preferred,
+        QSizePolicy::Fixed
+        );
     // =========================================
     // Radio Button
     // =========================================
@@ -287,11 +475,23 @@ void IngredientSelectionDialog::selectIngredient(
 
     bool ok = false;
 
+    auto ingredient =
+        m_appManager.findIngredient(ingredientId);
+
+    if (!ingredient.has_value())
+    {
+        return;
+    }
+
+    QString unitText;
+
+    unitText=Ingredient::unitToString(ingredient->getUnit());
+
     double quantity =
         QInputDialog::getDouble(
             this,
             "Ingredient Quantity",
-            "Enter quantity:",
+            "Enter quantity (" + unitText + "):",
             0.0,
             0.0,
             1000000.0,

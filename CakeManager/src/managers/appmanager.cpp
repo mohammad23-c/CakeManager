@@ -738,7 +738,6 @@ bool AppManager::updateDailySummary(qint64 dailyId)
         summary
         );
 
-    markAsChanged();
 
     return true;
 }
@@ -1162,7 +1161,7 @@ bool AppManager::addCakeToDaily(
             cakeIngredient.ingredientId
         ] -= requiredQuantity;
     }
-
+    updateDailySummary(dailyId);
     markAsChanged();
 
     return true;
@@ -1223,7 +1222,7 @@ bool AppManager::updateCakeToDaily(
         // چون چند خط قبل وجود Cake را بررسی کردیم.
         return false;
     }
-
+    updateDailySummary(dailyId);
     markAsChanged();
 
     return true;
@@ -1396,7 +1395,7 @@ bool AppManager::removeCakeFromDaily(
     {
         return false;
     }
-
+    updateDailySummary(dailyId);
     markAsChanged();
 
     return true;

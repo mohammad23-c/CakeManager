@@ -77,8 +77,15 @@ void CakeCardSetting::updateInfromation()
     if(!price.has_value()){
         return;
     }
-    ui->weight->setText(QString::number(weight.value())+"kilogram");
+    double percent=0;
+    if(!ui->lineEditProfit->text().isEmpty()){
+        percent=ui->lineEditProfit->text().toDouble();
+    }
+    ui->weight->setText(QString::number(weight.value())+" kilogram");
     ui->Price->setText(QString::number(price.value()));
+
+    double finalprice=price.value()*(1+percent/100.0);
+    ui->finalPrice->setText(QString::number(finalprice));
 }
 
 void CakeCardSetting::on_changeBtn_clicked()

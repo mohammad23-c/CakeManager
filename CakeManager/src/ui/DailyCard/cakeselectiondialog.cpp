@@ -11,11 +11,18 @@ CakeSelectionDialog::CakeSelectionDialog(
     m_cakeScrollArea(nullptr),
     m_cakeContent(nullptr),
     m_cakeGrid(nullptr),
+    m_searchLineEdit(nullptr),
     m_selectedCakeId(-1)
 {
     ui->setupUi(this);
 
     setWindowTitle("Select Cake");
+
+    resize(
+        900,
+        700
+        );
+
 
     // =========================================
     // Main Layout
@@ -25,11 +32,52 @@ CakeSelectionDialog::CakeSelectionDialog(
         new QVBoxLayout(this);
 
     mainLayout->setContentsMargins(
-        0, 0, 0, 0
+        0,0,0,0
         );
 
-    mainLayout->setSpacing(0);
+    mainLayout->setSpacing(5);
 
+
+    // =========================================
+    // Search Line
+    // =========================================
+
+    auto* searchLayout =
+        new QHBoxLayout;
+
+
+    m_searchLineEdit =
+        new QLineEdit(this);
+
+    m_searchLineEdit->setPlaceholderText(
+        "Search..."
+        );
+
+    m_searchLineEdit->setFixedHeight(
+        30
+        );
+
+
+    searchLayout->addWidget(
+        m_searchLineEdit,
+        3
+        );
+
+    searchLayout->addStretch(
+        1
+        );
+
+
+    mainLayout->addLayout(
+        searchLayout
+        );
+
+    connect(
+        m_searchLineEdit,
+        &QLineEdit::textChanged,
+        this,
+        &CakeSelectionDialog::onSearchTextChanged
+        );
     // =========================================
     // Scroll Area
     // =========================================
@@ -37,7 +85,10 @@ CakeSelectionDialog::CakeSelectionDialog(
     m_cakeScrollArea =
         new QScrollArea(this);
 
-    m_cakeScrollArea->setWidgetResizable(true);
+    m_cakeScrollArea->setWidgetResizable(
+        true
+        );
+
 
     m_cakeScrollArea->setHorizontalScrollBarPolicy(
         Qt::ScrollBarAsNeeded
@@ -47,6 +98,7 @@ CakeSelectionDialog::CakeSelectionDialog(
         Qt::ScrollBarAsNeeded
         );
 
+
     // =========================================
     // Content Widget
     // =========================================
@@ -54,20 +106,32 @@ CakeSelectionDialog::CakeSelectionDialog(
     m_cakeContent =
         new QWidget();
 
+
     // =========================================
     // Grid
     // =========================================
 
     m_cakeGrid =
-        new QGridLayout(m_cakeContent);
+        new QGridLayout(
+            m_cakeContent
+            );
+
 
     m_cakeGrid->setContentsMargins(
-        15, 15, 15, 15
+        15,15,15,15
         );
 
-    m_cakeGrid->setHorizontalSpacing(15);
-    m_cakeGrid->setVerticalSpacing(15);
+    m_cakeGrid->setHorizontalSpacing(
+        15
+        );
 
+    m_cakeGrid->setVerticalSpacing(
+        15
+        );
+
+    m_cakeGrid->setAlignment(
+        Qt::AlignTop
+        );
     // =========================================
     // Set Scroll Content
     // =========================================
@@ -76,13 +140,16 @@ CakeSelectionDialog::CakeSelectionDialog(
         m_cakeContent
         );
 
+
     mainLayout->addWidget(
         m_cakeScrollArea
         );
 
+
     // =========================================
     // Load Cakes
     // =========================================
+
     loadCakes();
 }
 
@@ -98,6 +165,98 @@ CakeSelectionDialog::~CakeSelectionDialog()
 qint64 CakeSelectionDialog::getSelectedCakeId() const
 {
     return m_selectedCakeId;
+}
+
+std::vector<qint64>
+CakeSelectionDialog::findCakesByName(
+    const QString& searchText
+    ) const
+{
+    std::vector<qint64> result;
+
+    QString text =
+        searchText.trimmed()
+            .toLower();
+
+
+    for (const auto& [id, item] : m_cakeItems)
+    {
+        QString name =
+            item.card->getName()
+                .toLower();
+
+
+        if (name.contains(text))
+        {
+            result.push_back(id);
+        }
+    }
+
+    return result;
+}
+
+void CakeSelectionDialog::clearCakeGrid()
+{
+    while (m_cakeGrid->count() > 0)
+    {
+        QLayoutItem* item =
+            m_cakeGrid->takeAt(0);
+
+        if (item->widget())
+        {
+            item->widget()->setParent(nullptr);
+        }
+
+        delete item;
+    }
+}
+
+void CakeSelectionDialog::loadCakeCards(
+    const std::vector<qint64>& cakeIds
+    )
+{
+    int index = 0;
+
+    for (qint64 id : cakeIds)
+    {
+        auto it =
+            m_cakeItems.find(id);
+
+        if (it == m_cakeItems.end())
+        {
+            continue;
+        }
+
+
+        int row =
+            index / 4;
+
+        int column =
+            index % 4;
+
+
+        m_cakeGrid->addWidget(
+            it->second.container,
+            row,
+            column
+            );
+
+        index++;
+    }
+}
+
+void CakeSelectionDialog::onSearchTextChanged(
+    const QString& text
+    )
+{
+    auto cakeIds =
+        findCakesByName(text);
+
+
+    clearCakeGrid();
+
+
+    loadCakeCards(cakeIds);
 }
 
 // =========================================
@@ -140,6 +299,11 @@ void CakeSelectionDialog::loadCakeCard(
     auto* container =
         new QWidget(m_cakeContent);
 
+    container->setSizePolicy(
+        QSizePolicy::Fixed,
+        QSizePolicy::Fixed
+        );
+
     auto* layout =
         new QVBoxLayout(container);
 
@@ -160,6 +324,10 @@ void CakeSelectionDialog::loadCakeCard(
             cake->getImagePath(),
             container
             );
+    card->setSizePolicy(
+        QSizePolicy::Fixed,
+        QSizePolicy::Fixed
+        );
 
     // =========================================
     // Radio Button

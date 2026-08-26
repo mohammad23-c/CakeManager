@@ -57,6 +57,8 @@ public:
     QString getImagePath() const;
     void setImagePath(const QString& imagePath);
 
+//
+    static Unit indexToUnit(int index);
 //this function will convert unit enum to string, for example: Unit::Kilogram -> "Kilogram"
     static QString unitToString(Unit u) ;
 //this func will convert attr of object to string|use to show object in console for test purpose
