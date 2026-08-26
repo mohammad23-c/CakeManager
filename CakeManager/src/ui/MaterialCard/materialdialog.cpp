@@ -179,6 +179,7 @@ void MaterialDialog::on_deleteIngredent_clicked()
                 );
             return ;
         }
+        m_appManager.deleteInventory(m_ingredientId);
         m_appManager.ingredientSave();
         emit deleteIng(m_ingredientId);
         accept();

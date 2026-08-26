@@ -53,10 +53,7 @@ bool InputValidator::validateLineEdit(
 
     if (!valid)
     {
-        lineEdit->setFocus();
-        lineEdit->setStyleSheet(
-            "border: 1px solid red;"
-            );
+        setFocusAndRedBorder(lineEdit);
 
         return false;
     }
@@ -66,3 +63,20 @@ bool InputValidator::validateLineEdit(
 
     return true;
 }
+
+void InputValidator::setFocusAndRedBorder(QWidget* widget)
+{
+    if (widget == nullptr)
+    {
+        return;
+    }
+
+    widget->setFocus();
+
+    widget->setStyleSheet(
+        "border: 2px solid red;"
+        "border-radius: 5px;"
+        );
+}
+
+

@@ -88,9 +88,17 @@ public:
     bool addCakeToDaily(
         qint64 dailyId,
         qint64 cakeId,
-        double quantity,
-        bool quantityIsWeight
+        double quantity
         );
+    bool updateCakeToDaily(qint64 dailyId
+                           ,qint64 cakeId
+                           ,double quantity);
+    bool checkInventoryHas(qint64 cakeId,double quantity) const;
+    bool changeInventory(
+        qint64 cakeId,
+        double quantity
+        );
+
     bool removeCakeFromDaily(
         qint64 dailyId,
         qint64 cakeId
@@ -160,6 +168,7 @@ public:
     //calculate daily summary
     //=================
     DailySummary calculateDailySummary(const Daily& daily) const;
+     bool updateDailySummary(qint64 dailyId);
     //======================
     //date
     //==========================
@@ -190,7 +199,18 @@ public:
     //GETTERS
     //==================
     std::vector<Ingredient> getIngredients() const;
-private:
+    std::vector<Cake> getCakes() const;
+
+    //calculate one cake price and weight with its ingredient
+    std::optional<double> calculateCakeWeight(
+        const std::vector<CakeIngredient>& ingredients
+        )const ;
+
+     std::optional<double> calculateCakePrice(
+        const std::vector<CakeIngredient>& ingredients
+        )const ;
+
+    private:
 
     // =========================================
     // Database

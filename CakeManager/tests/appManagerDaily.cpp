@@ -294,8 +294,7 @@ int main(int argc, char *argv[])
         manager.addCakeToDaily(
             dailyId,
             qromboId,
-            2.0,
-            false
+            2.0
             )
         );
 
@@ -358,8 +357,7 @@ int main(int argc, char *argv[])
         manager.addCakeToDaily(
             dailyId,
             qromboId,
-            2.4,
-            true
+            2.4
             )
         );
 
@@ -422,8 +420,7 @@ int main(int argc, char *argv[])
         manager.addCakeToDaily(
             dailyId,
             flonkyId,
-            2.0,
-            false
+            2.0
             )
         );
 
@@ -494,8 +491,7 @@ int main(int argc, char *argv[])
         !manager.addCakeToDaily(
             dailyId,
             grumpleId,
-            3.0,
-            false
+            3.0
             )
         );
 

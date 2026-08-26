@@ -19,6 +19,7 @@ public:
         QLineEdit* lineEdit,
         InputType expectedType
         );
+    static void setFocusAndRedBorder(QWidget* widget);
 };
 
 #endif // INPUTVALIDATOR_H

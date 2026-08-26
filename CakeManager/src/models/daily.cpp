@@ -134,6 +134,28 @@ bool Daily::containsCake(qint64 cakeId) const
     return false;
 }
 
+bool Daily::updateCake(
+    qint64 cakeId,
+    double quantity
+    )
+{
+    if (quantity <= 0)
+    {
+        return false;
+    }
+
+    for (auto& cake : m_cakes)
+    {
+        if (cake.cakeId == cakeId)
+        {
+            cake.quantity = quantity;
+            return true;
+        }
+    }
+
+    return false;
+}
+
 std::optional<DailyCake> Daily::findCake(qint64 cakeId) const
 {
     for (const auto& cake : m_cakes)

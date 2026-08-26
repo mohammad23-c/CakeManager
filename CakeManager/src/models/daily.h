@@ -75,6 +75,11 @@ public:
     // Checks whether the cake exists in this daily.
     bool containsCake(qint64 cakeId) const;
 
+    bool updateCake(
+        qint64 cakeId,
+        double quantity
+        );
+
     //this func find cake by id
     std::optional<DailyCake> findCake(qint64 cakeId) const;
 

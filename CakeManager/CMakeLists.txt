@@ -43,6 +43,16 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         main.cpp
         src/utils/validation/inputvalidator.h src/utils/validation/inputvalidator.cpp
         src/ui/CakeCard/cakecard.h src/ui/CakeCard/cakecard.cpp src/ui/CakeCard/cakecard.ui
+        src/ui/CakeCard/addcakedialog.h src/ui/CakeCard/addcakedialog.cpp src/ui/CakeCard/addcakedialog.ui
+        src/ui/CakeCard/ingredientselectiondialog.h src/ui/CakeCard/ingredientselectiondialog.cpp src/ui/CakeCard/ingredientselectiondialog.ui
+        src/ui/CakeCard/cakecardsetting.h src/ui/CakeCard/cakecardsetting.cpp src/ui/CakeCard/cakecardsetting.ui
+        src/ui/DailyCard/dailycakecard.h src/ui/DailyCard/dailycakecard.cpp src/ui/DailyCard/dailycakecard.ui
+        src/ui/DailyCard/dailycakecardsetting.h src/ui/DailyCard/dailycakecardsetting.cpp src/ui/DailyCard/dailycakecardsetting.ui
+        src/ui/DailyCard/addcaketodaily.h src/ui/DailyCard/addcaketodaily.cpp src/ui/DailyCard/addcaketodaily.ui
+        src/ui/DailyCard/cakeselectiondialog.h src/ui/DailyCard/cakeselectiondialog.cpp src/ui/DailyCard/cakeselectiondialog.ui
+
+
+
     )
 
 else()

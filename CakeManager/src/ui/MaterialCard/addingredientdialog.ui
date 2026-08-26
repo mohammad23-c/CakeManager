@@ -224,19 +224,6 @@
     <string>kiloogram</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_8">
-   <property name="geometry">
-    <rect>
-     <x>370</x>
-     <y>280</y>
-     <width>71</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>kiloogram</string>
-   </property>
-  </widget>
  </widget>
  <resources/>
  <connections/>

@@ -719,6 +719,30 @@ DailySummary AppManager::calculateDailySummary(const Daily &daily) const
     return summary;
 }
 
+bool AppManager::updateDailySummary(qint64 dailyId)
+{
+    auto it =
+        m_dailies.find(dailyId);
+
+    if (it == m_dailies.end())
+    {
+        return false;
+    }
+
+    DailySummary summary =
+        calculateDailySummary(
+            it->second
+            );
+
+    it->second.setSummary(
+        summary
+        );
+
+    markAsChanged();
+
+    return true;
+}
+
 QDate AppManager::getCurrentDate() const
 {
     return QDate::currentDate();
@@ -861,6 +885,96 @@ std::vector<Ingredient> AppManager::getIngredients() const
     return ingredients;
 }
 
+std::vector<Cake> AppManager::getCakes() const
+{
+    std::vector<Cake> cakes;
+    for(const auto& pair:m_cakes){
+        cakes.push_back(pair.second);
+    }
+    return cakes;
+}
+
+std::optional<double>
+AppManager::calculateCakePrice(
+    const std::vector<CakeIngredient>& ingredients
+    ) const
+{
+    double totalPrice = 0.0;
+
+    for (const auto& cakeIngredient : ingredients)
+    {
+        auto ingredientIt =
+            m_ingredients.find(
+                cakeIngredient.ingredientId
+                );
+
+        if (ingredientIt == m_ingredients.end())
+        {
+            return std::nullopt;
+        }
+
+        const Ingredient& ingredient =
+            ingredientIt->second;
+
+        double quantity =
+            cakeIngredient.quantity;
+
+        totalPrice +=
+            ingredient.getPricePerUnit()
+            * quantity;
+    }
+
+    return totalPrice;
+}
+
+std::optional<double>
+AppManager::calculateCakeWeight(
+    const std::vector<CakeIngredient>& ingredients
+    ) const
+{
+    double totalWeight = 0.0;
+
+    for (const auto& cakeIngredient : ingredients)
+    {
+        auto ingredientIt =
+            m_ingredients.find(
+                cakeIngredient.ingredientId
+                );
+
+        if (ingredientIt == m_ingredients.end())
+        {
+            return std::nullopt;
+        }
+
+        const Ingredient& ingredient =
+            ingredientIt->second;
+
+        double quantity =
+            cakeIngredient.quantity;
+
+        switch (ingredient.getUnit())
+        {
+        case Ingredient::Unit::Kilogram:
+            totalWeight +=
+                quantity * 1000.0;
+            break;
+
+        case Ingredient::Unit::Gram:
+            totalWeight +=
+                quantity;
+            break;
+
+        case Ingredient::Unit::Piece:
+            totalWeight +=
+                quantity
+                * ingredient.getWeightPerUnit();
+            break;
+        }
+    }
+
+    return totalWeight / 1000.0;
+}
+
 void AppManager::markAsChanged()
 {
     this->m_hasUnsavedChanges=true;
@@ -993,8 +1107,7 @@ std::vector<Daily> AppManager::getDailies() const
 bool AppManager::addCakeToDaily(
     qint64 dailyId,
     qint64 cakeId,
-    double quantity,
-    bool quantityIsWeight
+    double quantity
     )
 {
     if (quantity <= 0)
@@ -1003,9 +1116,187 @@ bool AppManager::addCakeToDaily(
     }
 
     // Find Daily
-    auto dailyIt = m_dailies.find(dailyId);
+    auto dailyIt =
+        m_dailies.find(dailyId);
 
     if (dailyIt == m_dailies.end())
+    {
+        return false;
+    }
+
+    // Check inventory
+    if (!checkInventoryHas(
+            cakeId,
+            quantity
+            ))
+    {
+        return false;
+    }
+
+    // Find Cake
+    auto cakeOpt =
+        findCake(cakeId);
+
+    if (!cakeOpt.has_value())
+    {
+        return false;
+    }
+
+    // Add cake to Daily
+    if (!dailyIt->second.addCake(
+            cakeId,
+            quantity
+            ))
+    {
+        return false;
+    }
+
+    // Decrease inventory
+    for (const auto& cakeIngredient :
+         cakeOpt->getIngredients())
+    {
+        double requiredQuantity =
+            cakeIngredient.quantity * quantity;
+
+        m_inventory[
+            cakeIngredient.ingredientId
+        ] -= requiredQuantity;
+    }
+
+    markAsChanged();
+
+    return true;
+}
+
+bool AppManager::updateCakeToDaily(
+    qint64 dailyId,
+    qint64 cakeId,
+    double quantity
+    )
+{
+    if (quantity <= 0)
+    {
+        return false;
+    }
+
+    auto dailyIt =
+        m_dailies.find(dailyId);
+
+    if (dailyIt == m_dailies.end())
+    {
+        return false;
+    }
+
+    auto dailyCake =
+        dailyIt->second.findCake(cakeId);
+
+    if (!dailyCake.has_value())
+    {
+        return false;
+    }
+
+    double oldQuantity =
+        dailyCake->quantity;
+
+    if (oldQuantity == quantity)
+    {
+        return true;
+    }
+
+    double inventoryChange =
+        oldQuantity - quantity;
+
+    if (!changeInventory(
+            cakeId,
+            inventoryChange
+            ))
+    {
+        return false;
+    }
+
+    if (!dailyIt->second.updateCake(
+            cakeId,
+            quantity
+            ))
+    {
+        // این حالت عملاً نباید رخ بده،
+        // چون چند خط قبل وجود Cake را بررسی کردیم.
+        return false;
+    }
+
+    markAsChanged();
+
+    return true;
+}
+
+
+
+bool AppManager::changeInventory(
+    qint64 cakeId,
+    double quantity
+    )
+{
+    if (quantity == 0)
+    {
+        return false;
+    }
+
+    // Find Cake
+    auto cakeOpt =
+        findCake(cakeId);
+
+    if (!cakeOpt.has_value())
+    {
+        return false;
+    }
+
+    // If quantity is negative,
+    // we are producing cakes and need to check inventory.
+    if (quantity < 0)
+    {
+        double producedQuantity =
+            -quantity;
+
+        if (!checkInventoryHas(
+                cakeId,
+                producedQuantity
+                ))
+        {
+            return false;
+        }
+    }
+
+    // Change inventory
+    for (const auto& cakeIngredient :
+         cakeOpt->getIngredients())
+    {
+        double change =
+            cakeIngredient.quantity * quantity;
+
+        auto inventoryIt =
+            m_inventory.find(
+                cakeIngredient.ingredientId
+                );
+
+        if (inventoryIt == m_inventory.end())
+        {
+            return false;
+        }
+
+        inventoryIt->second -= change;
+    }
+
+    markAsChanged();
+
+    return true;
+}
+
+bool AppManager::checkInventoryHas(
+    qint64 cakeId,
+    double quantity
+    ) const
+{
+    if (quantity <= 0)
     {
         return false;
     }
@@ -1018,54 +1309,29 @@ bool AppManager::addCakeToDaily(
         return false;
     }
 
-    // Check inventory before changing anything
+    // Check required ingredients
     for (const auto& cakeIngredient : cakeOpt->getIngredients())
     {
         double requiredQuantity =
             cakeIngredient.quantity * quantity;
 
         auto inventoryIt =
-            m_inventory.find(cakeIngredient.ingredientId);
+            m_inventory.find(
+                cakeIngredient.ingredientId
+                );
 
+        // Ingredient doesn't exist in inventory
         if (inventoryIt == m_inventory.end())
         {
             return false;
         }
 
+        // Not enough inventory
         if (inventoryIt->second < requiredQuantity)
         {
             return false;
         }
     }
-    if (quantityIsWeight)
-    {
-        auto cakeWeight = calculateCakeWeight(cakeId);
-
-        if (!cakeWeight.has_value() || *cakeWeight <= 0)
-        {
-            return false;
-        }
-
-        quantity /= *cakeWeight;
-    }
-
-    // Add cake to Daily
-    if (!dailyIt->second.addCake(cakeId, quantity))
-    {
-        return false;
-    }
-
-    // Decrease inventory
-    for (const auto& cakeIngredient : cakeOpt->getIngredients())
-    {
-        double requiredQuantity =
-            cakeIngredient.quantity * quantity;
-
-        m_inventory[cakeIngredient.ingredientId]
-            -= requiredQuantity;
-    }
-
-    markAsChanged();
 
     return true;
 }
