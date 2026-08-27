@@ -221,7 +221,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>kiloogram</string>
+    <string>gram</string>
    </property>
   </widget>
   <widget class="QLabel" name="showUnit">

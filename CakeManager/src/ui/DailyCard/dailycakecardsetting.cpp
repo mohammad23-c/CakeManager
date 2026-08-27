@@ -12,6 +12,7 @@ dailyCakeCardSetting::dailyCakeCardSetting(AppManager &appManager, qint64 dailyI
     , cakeId(cakeId)
 {
     ui->setupUi(this);
+    ui->reduceInventoryCheckBox->setChecked(true);
 
     connect(
         ui->comboBoxUnit,
@@ -90,6 +91,8 @@ dailyCakeCardSetting::dailyCakeCardSetting(AppManager &appManager, qint64 dailyI
     ui->doubleSpinBoxQuantity->setValue(first_quantity);
     double weight=first_quantity*cakeWeight;
     ui->doubleSpinBoxWeight->setValue(weight);
+
+
 }
 void dailyCakeCardSetting::updatePic()
 {
@@ -149,11 +152,14 @@ void dailyCakeCardSetting::on_pushButton_clicked()
 {
     double quantity =
         ui->doubleSpinBoxQuantity->value();
+    bool reduceInventory =
+        ui->reduceInventoryCheckBox->isChecked();
     bool success =
         m_appManager.updateCakeToDaily(
             dailyId,
             cakeId,
-            quantity
+            quantity,
+            reduceInventory
             );
 
     if (!success)
@@ -194,5 +200,31 @@ void dailyCakeCardSetting::on_weightChanged()
     ui->doubleSpinBoxQuantity->setValue(quantity);
 
     ui->doubleSpinBoxQuantity->blockSignals(false);
+}
+
+
+
+void dailyCakeCardSetting::on_deleteBtn_clicked()
+{
+    bool reduceInventory =
+        ui->reduceInventoryCheckBox->isChecked();
+    bool result=m_appManager.removeCakeFromDaily(dailyId,cakeId,reduceInventory);
+    if (!result)
+    {
+        QMessageBox::warning(
+            this,
+            "Error",
+            "Could not remove cake from daily"
+            );
+
+        return;
+    }
+    accept();
+}
+
+
+void dailyCakeCardSetting::on_pushButton_2_clicked()
+{
+    reject();
 }
 

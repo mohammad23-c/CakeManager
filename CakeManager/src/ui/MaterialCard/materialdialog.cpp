@@ -56,10 +56,24 @@ MaterialDialog::MaterialDialog(
     //price
     ui->PriceLineEdit->setText(QString::number(ingredient->getPricePerUnit()));
     //unit
-    ui->UnitcomboBox->setCurrentIndex(static_cast<int>(ingredient->getUnit()));
+    int index;
+    switch(ingredient->getUnit()){
+    case Ingredient::Unit::Kilogram:
+        index=0;
+        break;
+    case Ingredient::Unit::Gram:
+        index=1;
+        break;
+    case Ingredient::Unit::Piece:
+        index=2;
+        break;
+    default:
+        index=0;
+    }
+    ui->UnitcomboBox->setCurrentIndex(index);
     //weight per unit
     //default zero
-    ui->PricepuLineE->setText("0");
+    ui->PricepuLineE->setText(QString::number(0));
     if(ingredient->getUnit()==Ingredient::Unit::Piece){
         ui->PricepuLineE->setEnabled(true);
         //weight per uinit always in kilogram
@@ -123,16 +137,34 @@ void MaterialDialog::on_save_clicked()
     if(!InputValidator::validateLineEdit(ui->PriceLineEdit,InputValidator::InputType::Double)){
         return;
     }in->setPricePerUnit(ui->PriceLineEdit->text().toDouble());
+    //find unit
+    Ingredient::Unit u;
+    switch (ui->UnitcomboBox->currentIndex()) {
+    case 0:
+        u=Ingredient::Unit::Kilogram;
+        break;
+    case 1:
+        u=Ingredient::Unit::Gram;
+        break;
+    case 2:
+        u=Ingredient::Unit::Piece;
+        break;
+    default:
+        u=Ingredient::Unit::Kilogram;
+        break;
+    }
     //no check
-    in->setUnit(static_cast<Ingredient::Unit>(ui->UnitcomboBox->currentIndex()));
-
+    in->setUnit(u);
+    double weightPerUnit=0;
     if(in->getUnit()==Ingredient::Unit::Piece){
-        if(!InputValidator::validateLineEdit(ui->PricepuLineE,InputValidator::InputType::Double)){
+        if(!InputValidator::validateLineEdit(ui->PricepuLineE,InputValidator::InputType::Integer)){
             QMessageBox::warning(this,"warning","weight per unit cant empty");
             return;
         }
-        in->setWeightPerUnit(ui->PricepuLineE->text().toDouble());
+        if(!ui->PricepuLineE->text().isEmpty())
+            weightPerUnit=ui->PricepuLineE->text().toInt();
     }
+    in->setWeightPerUnit(weightPerUnit);
 
     //image path already set in on_choosePicBtn_clicked
     if(!InputValidator::validateLineEdit(ui->lineEditInventory,InputValidator::InputType::Double))

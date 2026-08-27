@@ -39,6 +39,7 @@ AddCakeToDaily::AddCakeToDaily(
         &AddCakeToDaily::on_weightChanged
         );
 
+    ui->reduceInventoryCheckBox->setChecked(true);
     ui->comboBox->setEnabled(false);
     ui->doubleSpinBoxWeight->setEnabled(false);
     ui->doubleSpinBoxQuantity->setEnabled(false);
@@ -196,6 +197,7 @@ void AddCakeToDaily::on_AddBtn_clicked()
         }
         return;
     }
+    bool reduce=ui->reduceInventoryCheckBox->isChecked();
     DailyCake dc;
     dc.cakeId=cakeId;
     dc.quantity=ui->doubleSpinBoxQuantity->value();
@@ -215,7 +217,8 @@ void AddCakeToDaily::on_AddBtn_clicked()
         m_appmanager.addCakeToDaily(
             day->getId(),
             dc.cakeId,
-            dc.quantity
+            dc.quantity,
+            reduce
             );
 
     if (!success)

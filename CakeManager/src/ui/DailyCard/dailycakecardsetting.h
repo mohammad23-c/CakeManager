@@ -31,6 +31,11 @@ private slots:
     void on_quantityChanged();
     void on_weightChanged();
 
+
+    void on_deleteBtn_clicked();
+
+    void on_pushButton_2_clicked();
+
 private:
     Ui::dailyCakeCardSetting *ui;
 

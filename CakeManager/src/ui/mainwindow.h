@@ -90,7 +90,7 @@ public:
         );
     void updateDailyCakeCard(qint64 cakeId);
     void updateDailySummary();
-
+    void removeDailyCakeCard(qint64 cakeId);
     ~MainWindow() override;
 
 private slots:

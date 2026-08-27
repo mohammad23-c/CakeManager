@@ -98,7 +98,7 @@ void AddIngredientDialog::on_pushButton_clicked()
     {
         if (!InputValidator::validateLineEdit(
                 ui->lineEditweightPer,
-                InputValidator::InputType::Double))
+                InputValidator::InputType::Integer))
         {
             return;
         }
@@ -115,11 +115,25 @@ void AddIngredientDialog::on_pushButton_clicked()
     in.setPricePerUnit(
         ui->lineEditPrice->text().toDouble()
         );
+    //find unit
+    Ingredient::Unit u;
+    switch (ui->comboBoxunit->currentIndex()) {
+    case 0:
+        u=Ingredient::Unit::Kilogram;
+        break;
+    case 1:
+        u=Ingredient::Unit::Gram;
+        break;
+    case 2:
+        u=Ingredient::Unit::Piece;
+        break;
+    default:
+        u=Ingredient::Unit::Kilogram;
+        break;
+    }
 
     in.setUnit(
-        static_cast<Ingredient::Unit>(
-            ui->comboBoxunit->currentIndex()
-            )
+        u
         );
 
     in.setWeightPerUnit(0);
@@ -127,7 +141,7 @@ void AddIngredientDialog::on_pushButton_clicked()
     if (in.getUnit() == Ingredient::Unit::Piece)
     {
         in.setWeightPerUnit(
-            ui->lineEditweightPer->text().toDouble()
+            ui->lineEditweightPer->text().toInt()
             );
     }
 

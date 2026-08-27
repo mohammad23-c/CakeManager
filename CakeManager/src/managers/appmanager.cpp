@@ -1106,7 +1106,8 @@ std::vector<Daily> AppManager::getDailies() const
 bool AppManager::addCakeToDaily(
     qint64 dailyId,
     qint64 cakeId,
-    double quantity
+    double quantity,
+    bool reduceInventory
     )
 {
     if (quantity <= 0)
@@ -1123,15 +1124,6 @@ bool AppManager::addCakeToDaily(
         return false;
     }
 
-    // Check inventory
-    if (!checkInventoryHas(
-            cakeId,
-            quantity
-            ))
-    {
-        return false;
-    }
-
     // Find Cake
     auto cakeOpt =
         findCake(cakeId);
@@ -1139,6 +1131,18 @@ bool AppManager::addCakeToDaily(
     if (!cakeOpt.has_value())
     {
         return false;
+    }
+
+    // Check inventory only if needed
+    if (reduceInventory)
+    {
+        if (!checkInventoryHas(
+                cakeId,
+                quantity
+                ))
+        {
+            return false;
+        }
     }
 
     // Add cake to Daily
@@ -1150,17 +1154,22 @@ bool AppManager::addCakeToDaily(
         return false;
     }
 
-    // Decrease inventory
-    for (const auto& cakeIngredient :
-         cakeOpt->getIngredients())
+    // Decrease inventory only if needed
+    //if user want to change inventory
+    if (reduceInventory)
     {
-        double requiredQuantity =
-            cakeIngredient.quantity * quantity;
+        for (const auto& cakeIngredient :
+             cakeOpt->getIngredients())
+        {
+            double requiredQuantity =
+                cakeIngredient.quantity * quantity;
 
-        m_inventory[
-            cakeIngredient.ingredientId
-        ] -= requiredQuantity;
+            m_inventory[
+                cakeIngredient.ingredientId
+            ] -= requiredQuantity;
+        }
     }
+
     updateDailySummary(dailyId);
     markAsChanged();
 
@@ -1170,7 +1179,8 @@ bool AppManager::addCakeToDaily(
 bool AppManager::updateCakeToDaily(
     qint64 dailyId,
     qint64 cakeId,
-    double quantity
+    double quantity,
+    bool reduceInventory
     )
 {
     if (quantity <= 0)
@@ -1201,16 +1211,19 @@ bool AppManager::updateCakeToDaily(
     {
         return true;
     }
-
-    double inventoryChange =
-        oldQuantity - quantity;
-
-    if (!changeInventory(
-            cakeId,
-            inventoryChange
-            ))
+    //if user want to change inventory ...
+    if (reduceInventory)
     {
-        return false;
+        double inventoryChange =
+            oldQuantity - quantity;
+
+        if (!changeInventory(
+                cakeId,
+                inventoryChange
+                ))
+        {
+            return false;
+        }
     }
 
     if (!dailyIt->second.updateCake(
@@ -1218,10 +1231,9 @@ bool AppManager::updateCakeToDaily(
             quantity
             ))
     {
-        // این حالت عملاً نباید رخ بده،
-        // چون چند خط قبل وجود Cake را بررسی کردیم.
         return false;
     }
+
     updateDailySummary(dailyId);
     markAsChanged();
 
@@ -1282,7 +1294,7 @@ bool AppManager::changeInventory(
             return false;
         }
 
-        inventoryIt->second -= change;
+        inventoryIt->second += change;
     }
 
     markAsChanged();
@@ -1337,11 +1349,13 @@ bool AppManager::checkInventoryHas(
 
 bool AppManager::removeCakeFromDaily(
     qint64 dailyId,
-    qint64 cakeId
+    qint64 cakeId,
+    bool reduceInventory
     )
 {
     // Find Daily
-    auto dailyIt = m_dailies.find(dailyId);
+    auto dailyIt =
+        m_dailies.find(dailyId);
 
     if (dailyIt == m_dailies.end())
     {
@@ -1349,7 +1363,8 @@ bool AppManager::removeCakeFromDaily(
     }
 
     // Find Cake
-    auto cakeOpt = findCake(cakeId);
+    auto cakeOpt =
+        findCake(cakeId);
 
     if (!cakeOpt.has_value())
     {
@@ -1365,28 +1380,35 @@ bool AppManager::removeCakeFromDaily(
         return false;
     }
 
-    double quantity = dailyCakeOpt->quantity;
+    double quantity =
+        dailyCakeOpt->quantity;
 
-    // Return ingredients to inventory
-    for (const auto& cakeIngredient : cakeOpt->getIngredients())
+    // Return ingredients to inventory only if needed
+    if (reduceInventory)
     {
-        double returnedQuantity =
-            cakeIngredient.quantity * quantity;
-
-        auto inventoryIt =
-            m_inventory.find(cakeIngredient.ingredientId);
-
-        if (inventoryIt == m_inventory.end())
+        for (const auto& cakeIngredient :
+             cakeOpt->getIngredients())
         {
-            // Inventory entry does not exist
-            m_inventory.emplace(
-                cakeIngredient.ingredientId,
-                returnedQuantity
-                );
-        }
-        else
-        {
-            inventoryIt->second += returnedQuantity;
+            double returnedQuantity =
+                cakeIngredient.quantity * quantity;
+
+            auto inventoryIt =
+                m_inventory.find(
+                    cakeIngredient.ingredientId
+                    );
+
+            if (inventoryIt == m_inventory.end())
+            {
+                // Inventory entry does not exist
+                m_inventory.emplace(
+                    cakeIngredient.ingredientId,
+                    returnedQuantity
+                    );
+            }
+            else
+            {
+                inventoryIt->second += returnedQuantity;
+            }
         }
     }
 
@@ -1395,6 +1417,7 @@ bool AppManager::removeCakeFromDaily(
     {
         return false;
     }
+
     updateDailySummary(dailyId);
     markAsChanged();
 

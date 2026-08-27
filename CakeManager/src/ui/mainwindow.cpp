@@ -6,6 +6,7 @@
 #include "CakeCard/cakeCardSetting.h"
 #include "DailyCard/dailyCakeCardSetting.h"
 #include "DailyCard/AddCakeToDaily.h"
+#include "../utils/outputcontroll.h"
 #include <QLabel>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -922,20 +923,26 @@ void MainWindow::createDailyCakeEditDialog(qint64 cakeId)
         this
         );
 
-    if (dialog.exec() == QDialog::Accepted)
+    if (dialog.exec() != QDialog::Accepted)
     {
-        auto daily =
-            m_appManager.findDaily(
-                m_currentDaily.getDate()
-                );
-
-        if (daily.has_value())
-        {
-            m_currentDaily = daily.value();
-        }
-
-        updateDailyCakeCard(cakeId);
+        return;
     }
+
+    auto daily =
+        m_appManager.findDaily(
+            m_currentDaily.getDate()
+            );
+
+    if (!daily.has_value())
+    {
+        return;
+    }
+    m_currentDaily = daily.value();
+    if(!m_currentDaily.containsCake(cakeId)){
+        removeDailyCakeCard(cakeId);
+        return;
+    }
+    updateDailyCakeCard(cakeId);
 }
 
 void MainWindow::onAddDailyCakeClicked()
@@ -1182,16 +1189,30 @@ void MainWindow::updateDailySummary()
 
     m_dailyTotalCostLabel->setText(
         "Total Cost: " +
-        QString::number(
-            summary.totalCost
-            )
+        outPutControll::formatPrice(summary.totalCost)
         );
 
     m_dailyTotalSalesLabel->setText(
         "Total Sales: " +
-        QString::number(
-            summary.totalSales
-            )
+        outPutControll::formatPrice(summary.totalSales)
         );
+}
+
+void MainWindow::removeDailyCakeCard(qint64 cakeId)
+{
+    auto it = m_dailyCakeCards.find(cakeId);
+
+    if(it == m_dailyCakeCards.end())
+    {
+        return;
+    }
+
+    auto* card = it->second;
+
+    m_dailyLayout->removeWidget(card);
+
+    m_dailyCakeCards.erase(it);
+    delete card;
+    updateDailySummary();
 }
 

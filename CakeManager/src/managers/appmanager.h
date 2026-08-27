@@ -88,12 +88,17 @@ public:
     bool addCakeToDaily(
         qint64 dailyId,
         qint64 cakeId,
-        double quantity
+        double quantity,
+        bool reduceInventory=true
+
         );
     bool updateCakeToDaily(qint64 dailyId
                            ,qint64 cakeId
-                           ,double quantity);
-    bool checkInventoryHas(qint64 cakeId,double quantity) const;
+                           ,double quantity
+                           ,bool reduceInventory=true);
+    bool checkInventoryHas(qint64 cakeId,
+                        double quantity
+                        ) const;
     bool changeInventory(
         qint64 cakeId,
         double quantity
@@ -101,7 +106,8 @@ public:
 
     bool removeCakeFromDaily(
         qint64 dailyId,
-        qint64 cakeId
+        qint64 cakeId,
+        bool reduceInventory=true
         );
     // =========================================
     // Price

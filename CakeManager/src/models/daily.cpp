@@ -81,7 +81,10 @@ void Daily::setId(qint64 id)
 // Cake Management
 // =========================================
 
-bool Daily::addCake(qint64 cakeId, double quantity)
+bool Daily::addCake(
+    qint64 cakeId,
+    double quantity
+    )
 {
     // Quantity must be positive
     if (quantity <= 0)
@@ -99,8 +102,14 @@ bool Daily::addCake(qint64 cakeId, double quantity)
         }
     }
 
-    // Cake does not exist
-    m_cakes.push_back({cakeId, quantity});
+
+
+    m_cakes.push_back(
+        {
+            cakeId,
+            quantity,
+        }
+        );
 
     return true;
 }
