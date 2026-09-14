@@ -35,6 +35,9 @@ private slots:
     void setLabelUnit(int index);
 
     void on_deleteIngredent_clicked();
+
+    void on_tabdilVahed_clicked();
+
 signals:
     void deleteIng(qint64 ingredientId);
 private:

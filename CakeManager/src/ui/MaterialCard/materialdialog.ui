@@ -6,72 +6,153 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>709</width>
-    <height>440</height>
+    <width>732</width>
+    <height>404</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QLabel" name="IngredientName">
+  <widget class="QLabel" name="pricePerUintLabel">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>230</y>
-     <width>91</width>
+     <x>60</x>
+     <y>260</y>
+     <width>96</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>name:</string>
+    <string>وزن بر واحد</string>
    </property>
   </widget>
-  <widget class="QLabel" name="IngredientPrice">
+  <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>300</y>
-     <width>63</width>
+     <x>260</x>
+     <y>260</y>
+     <width>41</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>گرم</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="PriceLineEdit">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>180</y>
+     <width>141</width>
+     <height>28</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="UnitcomboBox">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>220</y>
+     <width>141</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>کیلوگرم</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>گرم</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>عدد</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLineEdit" name="PricepuLineE">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>260</y>
+     <width>78</width>
+     <height>28</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelInventory">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>140</y>
+     <width>64</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>price:</string>
+    <string>در انبار</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEditInventory">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>140</y>
+     <width>101</width>
+     <height>28</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="showUnit">
+   <property name="geometry">
+    <rect>
+     <x>280</x>
+     <y>140</y>
+     <width>61</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>----</string>
    </property>
   </widget>
   <widget class="QLabel" name="IngredientUnit">
    <property name="geometry">
     <rect>
-     <x>450</x>
-     <y>290</y>
-     <width>63</width>
+     <x>90</x>
+     <y>220</y>
+     <width>30</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>Unit:</string>
+    <string>واحد</string>
    </property>
   </widget>
-  <widget class="QLabel" name="ingredientImage">
+  <widget class="QLabel" name="IngredientName">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>340</y>
-     <width>63</width>
+     <x>80</x>
+     <y>100</y>
+     <width>40</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>image:</string>
+    <string>اسم</string>
    </property>
   </widget>
   <widget class="QLabel" name="Image">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>10</y>
-     <width>361</width>
-     <height>141</height>
+     <x>350</x>
+     <y>90</y>
+     <width>291</width>
+     <height>201</height>
     </rect>
    </property>
    <property name="text">
@@ -81,173 +162,93 @@
     <set>Qt::AlignmentFlag::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QPushButton" name="choosePicBtn">
+  <widget class="QLabel" name="IngredientPrice">
    <property name="geometry">
     <rect>
-     <x>70</x>
-     <y>340</y>
-     <width>90</width>
-     <height>29</height>
+     <x>60</x>
+     <y>180</y>
+     <width>91</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>choose pic</string>
+    <string>قیمت بر واحد</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="NamelineEdit">
    <property name="geometry">
     <rect>
-     <x>70</x>
-     <y>220</y>
-     <width>113</width>
-     <height>28</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="PriceLineEdit">
-   <property name="geometry">
-    <rect>
-     <x>70</x>
-     <y>300</y>
-     <width>113</width>
-     <height>28</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="UnitcomboBox">
-   <property name="geometry">
-    <rect>
-     <x>520</x>
-     <y>290</y>
+     <x>170</x>
+     <y>90</y>
      <width>131</width>
      <height>28</height>
     </rect>
    </property>
-   <item>
-    <property name="text">
-     <string>Kilogram</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>gram</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>piece</string>
-    </property>
-   </item>
   </widget>
-  <widget class="QLabel" name="pricePerUintLabel">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>380</x>
-     <y>180</y>
-     <width>101</width>
-     <height>20</height>
+     <x>81</x>
+     <y>300</y>
+     <width>561</width>
+     <height>31</height>
     </rect>
    </property>
-   <property name="text">
-    <string>weightPerUinit</string>
-   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <widget class="QPushButton" name="deleteIngredent">
+      <property name="text">
+       <string>پاک کردن</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="choosePicBtn">
+      <property name="text">
+       <string>انتخاب عکس</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Orientation::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton_2">
+      <property name="text">
+       <string>لغو</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="save">
+      <property name="text">
+       <string>ذخیره</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
-  <widget class="QLineEdit" name="PricepuLineE">
-   <property name="geometry">
-    <rect>
-     <x>490</x>
-     <y>180</y>
-     <width>113</width>
-     <height>28</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="save">
-   <property name="geometry">
-    <rect>
-     <x>550</x>
-     <y>370</y>
-     <width>90</width>
-     <height>29</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>save</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton_2">
-   <property name="geometry">
-    <rect>
-     <x>440</x>
-     <y>370</y>
-     <width>90</width>
-     <height>29</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>cancel</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="deleteIngredent">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>380</y>
-     <width>61</width>
-     <height>29</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>delete</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="labelInventory">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>260</y>
-     <width>71</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>inventory:</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="lineEditInventory">
+  <widget class="QPushButton" name="tabdilVahed">
    <property name="geometry">
     <rect>
      <x>80</x>
-     <y>260</y>
-     <width>101</width>
-     <height>28</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>610</x>
-     <y>180</y>
-     <width>63</width>
-     <height>20</height>
+     <y>340</y>
+     <width>81</width>
+     <height>29</height>
     </rect>
    </property>
    <property name="text">
-    <string>gram</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="showUnit">
-   <property name="geometry">
-    <rect>
-     <x>190</x>
-     <y>260</y>
-     <width>63</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>----</string>
+    <string>تبدیل واحد</string>
    </property>
   </widget>
  </widget>

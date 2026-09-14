@@ -8,15 +8,32 @@
 #include "DailyCard/AddCakeToDaily.h"
 #include "../utils/outputcontroll.h"
 #include <QLabel>
+#include <QStandardPaths>
+#include <QDir>
+
+
+//this func use to create path for database
+QString getDatabasePath()
+{
+    QString path =
+        QStandardPaths::writableLocation(
+            QStandardPaths::AppLocalDataLocation
+            );
+
+    QDir().mkpath(path);
+    qDebug() << "Database path:" << path;
+    return path + "/primaryDataBase.db";
+}
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , m_appManager("primaryDataBase.db")
+    ,m_appManager(getDatabasePath())
     , m_ingredientScrollArea(nullptr)
     , m_ingredientContent(nullptr)
     , m_ingredientGrid(nullptr)
 {
+
     ui->setupUi(this);
 
     QWidget* cakesPage = new QWidget();
@@ -140,7 +157,7 @@ void MainWindow::createIngredientPage()
         new QLineEdit(ingredientsPage);
 
     m_ingredientSearch->setPlaceholderText(
-        "Search"
+        "جستجو"
         );
 
     m_ingredientSearch->setFixedHeight(40);
@@ -148,7 +165,7 @@ void MainWindow::createIngredientPage()
     // Add Button
     m_addIngredientButton =
         new QPushButton(
-            "Add Ingredient",
+            "اضافه کردن مواد اولیه",
             ingredientsPage
             );
 
@@ -309,6 +326,25 @@ void MainWindow::loadIngredientCards(
     }
 }
 
+void MainWindow::reloadIngredientCards()
+{
+    // حذف تمام کارت‌های فعلی
+    while (QLayoutItem* item = m_ingredientGrid->takeAt(0))
+    {
+        if (QWidget* widget = item->widget())
+        {
+            delete widget;
+        }
+
+        delete item;
+    }
+
+    m_materialCards.clear();
+
+    // ساخت دوباره کارت‌ها از روی AppManager
+    loadIngredients();
+}
+
 void MainWindow::createCakePage()
 {
     QWidget* cakesPage =
@@ -385,7 +421,7 @@ void MainWindow::createCakePage()
         new QLineEdit(cakesPage);
 
     m_cakeSearch->setPlaceholderText(
-        "Search"
+        "جستجو"
         );
 
     m_cakeSearch->setFixedHeight(40);
@@ -393,7 +429,7 @@ void MainWindow::createCakePage()
     // Add Cake Button
     m_addCakeButton =
         new QPushButton(
-            "Add Cake",
+            "اضافه کردن کیک",
             cakesPage
             );
 
@@ -635,7 +671,7 @@ void MainWindow::createDailyPage()
 
     m_addDailyCakeButton =
         new QPushButton(
-            "Add Cake",
+            "اضافه کردن کیک",
             dailyPage
             );
 
@@ -827,20 +863,9 @@ void MainWindow::createIngredientEditDialog(qint64 ingredientId)
 
 void MainWindow::deleteIngredientCard(qint64 ingredientId)
 {
-    auto it = m_materialCards.find(ingredientId);
+    Q_UNUSED(ingredientId);
 
-    if (it == m_materialCards.end())
-    {
-        return;
-    }
-
-    MaterialCard* card = it->second;
-
-    m_ingredientGrid->removeWidget(card);
-
-    m_materialCards.erase(it);
-
-    delete card;
+    reloadIngredientCards();
 }
 
 void MainWindow::createCakeEditDialog(qint64 cakeId)

@@ -12,14 +12,72 @@ DailyCakeCard::DailyCakeCard(
     )
     : QWidget(parent),
     m_appManager(appManager),
-    m_nameLabel(new QLabel(this)),
-    m_quantityLabel(new QLabel(this)),
+    m_cardWidget(new QWidget(this)),
+    m_nameLabel(new QLabel(m_cardWidget)),
+    m_quantityLabel(new QLabel(m_cardWidget)),
     m_layout(new QHBoxLayout(this)),
+    m_cardLayout(new QHBoxLayout(m_cardWidget)),
     m_cakeId(cakeId),
     m_quantity(quantity)
 {
+    m_cardWidget->setObjectName("dailyCakeCardWidget");
+    qDebug() << m_cardWidget->objectName();
+    // =========================================
+    // Card Widget Style
+    // =========================================
+
+    // m_cardWidget->setStyleSheet(
+    //     "background-color: #5A4638;"
+    //     "border: none;"
+    //     "border-radius: 14px;"
+    //     );
+
+    // =========================================
+    // Labels
+    // =========================================
+
+    // m_nameLabel->setStyleSheet(
+    //     "background: transparent;"
+    //     "border: none;"
+    //     "color: #FFFFFF;"
+    //     "font-weight: bold;"
+    //     );
+
+    // m_quantityLabel->setStyleSheet(
+    //     "background: transparent;"
+    //     "border: none;"
+    //     "color: #E6C15A;"
+    //     "font-weight: bold;"
+    //     );
+
+    // =========================================
+    // Card Size
+    // =========================================
+
     setMinimumHeight(50);
     setMaximumHeight(50);
+
+    // =========================================
+    // Main Layout
+    // =========================================
+
+    m_layout->setContentsMargins(
+        0, 0, 0, 0
+        );
+
+    m_layout->addWidget(
+        m_cardWidget
+        );
+
+    // =========================================
+    // Card Layout
+    // =========================================
+
+    m_cardLayout->setContentsMargins(
+        15, 5, 15, 5
+        );
+
+    m_cardLayout->setSpacing(10);
 
     m_nameLabel->setAlignment(
         Qt::AlignLeft | Qt::AlignVCenter
@@ -29,19 +87,13 @@ DailyCakeCard::DailyCakeCard(
         Qt::AlignRight | Qt::AlignVCenter
         );
 
-    m_layout->setContentsMargins(
-        15, 5, 15, 5
-        );
-
-    m_layout->setSpacing(10);
-
-    m_layout->addWidget(
+    m_cardLayout->addWidget(
         m_nameLabel
         );
 
-    m_layout->addStretch();
+    m_cardLayout->addStretch();
 
-    m_layout->addWidget(
+    m_cardLayout->addWidget(
         m_quantityLabel
         );
 

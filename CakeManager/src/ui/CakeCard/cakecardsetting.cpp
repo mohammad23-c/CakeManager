@@ -5,6 +5,7 @@
 #include <QFileDialog>
 
 #include "../../utils/validation/inputvalidator.h"
+#include "../../utils/outputcontroll.h"
 
 CakeCardSetting::CakeCardSetting(
     AppManager& appManager,
@@ -14,7 +15,8 @@ CakeCardSetting::CakeCardSetting(
     : QDialog(parent),
     m_appManager(appManager),
     m_cakeId(cakeId),
-    ui(new Ui::CakeCardSetting)
+    ui(new Ui::CakeCardSetting),
+    imagePath(":/defultPic/images.png")
 {
     ui->setupUi(this);
 
@@ -56,14 +58,34 @@ void CakeCardSetting::updatePic()
     {
         pixmap.load(imagePath);
     }else{
-        pixmap.load(":/images/default.png");
+        pixmap.load(":/defultPic/images.png");
     }
     pixmap = pixmap.scaled(
         ui->Image->size(),
-        Qt::KeepAspectRatio,
+        Qt::IgnoreAspectRatio,
         Qt::SmoothTransformation
         );
-    ui->Image->setPixmap(pixmap);
+
+    // Round corners
+    QPixmap roundedPixmap(pixmap.size());
+    roundedPixmap.fill(Qt::transparent);
+
+    QPainter painter(&roundedPixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    QPainterPath path;
+    path.addRoundedRect(
+        roundedPixmap.rect(),
+        12,
+        12
+        );
+
+    painter.setClipPath(path);
+    painter.drawPixmap(0, 0, pixmap);
+
+    painter.end();
+
+    ui->Image->setPixmap(roundedPixmap);
     return ;
 }
 //
@@ -82,10 +104,10 @@ void CakeCardSetting::updateInfromation()
         percent=ui->lineEditProfit->text().toDouble();
     }
     ui->weight->setText(QString::number(weight.value())+" kilogram");
-    ui->Price->setText(QString::number(price.value()));
+    ui->Price->setText(outPutControll::formatPrice((price.value())));
 
     double finalprice=price.value()*(1+percent/100.0);
-    ui->finalPrice->setText(QString::number(finalprice));
+    ui->finalPrice->setText(outPutControll::formatPrice((finalprice)));
 }
 
 void CakeCardSetting::on_changeBtn_clicked()

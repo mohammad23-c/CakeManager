@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>997</width>
-    <height>565</height>
+    <width>891</width>
+    <height>583</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,36 +16,36 @@
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>190</y>
-     <width>63</width>
+     <x>230</x>
+     <y>150</y>
+     <width>40</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>name:</string>
+    <string>اسم</string>
    </property>
   </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>250</y>
-     <width>121</width>
-     <height>31</height>
+     <x>191</x>
+     <y>191</y>
+     <width>83</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>PricePercent:</string>
+    <string>درصد سود</string>
    </property>
   </widget>
   <widget class="QLabel" name="Image">
    <property name="geometry">
     <rect>
-     <x>520</x>
-     <y>110</y>
-     <width>411</width>
-     <height>291</height>
+     <x>450</x>
+     <y>150</y>
+     <width>311</width>
+     <height>241</height>
     </rect>
    </property>
    <property name="text">
@@ -58,75 +58,75 @@
   <widget class="QLabel" name="label_5">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>400</y>
-     <width>111</width>
-     <height>31</height>
+     <x>210</x>
+     <y>270</y>
+     <width>48</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>weight:</string>
+    <string>وزن</string>
    </property>
   </widget>
   <widget class="QComboBox" name="comboBoxUnit">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>360</y>
-     <width>82</width>
+     <x>191</x>
+     <y>230</y>
+     <width>90</width>
      <height>28</height>
     </rect>
    </property>
    <item>
     <property name="text">
-     <string>piece</string>
+     <string>عدد</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>kilogram</string>
+     <string>کیلوگرم</string>
     </property>
    </item>
   </widget>
   <widget class="QLabel" name="label_6">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>440</y>
-     <width>91</width>
-     <height>41</height>
+     <x>191</x>
+     <y>301</y>
+     <width>72</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>equivalent:</string>
+    <string>تعداد</string>
    </property>
   </widget>
   <widget class="QDoubleSpinBox" name="doubleSpinBoxWeight">
    <property name="geometry">
     <rect>
-     <x>200</x>
-     <y>400</y>
-     <width>63</width>
-     <height>29</height>
+     <x>336</x>
+     <y>263</y>
+     <width>71</width>
+     <height>31</height>
     </rect>
    </property>
   </widget>
   <widget class="QDoubleSpinBox" name="doubleSpinBoxQuantity">
    <property name="geometry">
     <rect>
-     <x>200</x>
-     <y>440</y>
-     <width>63</width>
-     <height>29</height>
+     <x>336</x>
+     <y>301</y>
+     <width>71</width>
+     <height>31</height>
     </rect>
    </property>
   </widget>
   <widget class="QLabel" name="name">
    <property name="geometry">
     <rect>
-     <x>230</x>
-     <y>190</y>
-     <width>63</width>
+     <x>315</x>
+     <y>151</y>
+     <width>101</width>
      <height>20</height>
     </rect>
    </property>
@@ -137,9 +137,9 @@
   <widget class="QLabel" name="PricePercent">
    <property name="geometry">
     <rect>
-     <x>230</x>
-     <y>250</y>
-     <width>63</width>
+     <x>315</x>
+     <y>191</y>
+     <width>91</width>
      <height>20</height>
     </rect>
    </property>
@@ -147,69 +147,80 @@
     <string>-----</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="showIngerBtn">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>300</y>
-     <width>201</width>
-     <height>29</height>
+     <x>190</x>
+     <y>410</y>
+     <width>541</width>
+     <height>33</height>
     </rect>
    </property>
-   <property name="text">
-    <string>showIngredient</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton">
-   <property name="geometry">
-    <rect>
-     <x>780</x>
-     <y>470</y>
-     <width>90</width>
-     <height>29</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>change</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton_2">
-   <property name="geometry">
-    <rect>
-     <x>680</x>
-     <y>470</y>
-     <width>90</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>cancel</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="deleteBtn">
-   <property name="geometry">
-    <rect>
-     <x>70</x>
-     <y>70</y>
-     <width>90</width>
-     <height>29</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>delete</string>
-   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <item>
+     <widget class="QPushButton" name="deleteBtn">
+      <property name="text">
+       <string>حذف</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Orientation::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="pushButton_2">
+        <property name="text">
+         <string>لغو</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="text">
+         <string>تغییر</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
   <widget class="QCheckBox" name="reduceInventoryCheckBox">
    <property name="geometry">
     <rect>
-     <x>690</x>
-     <y>40</y>
-     <width>201</width>
+     <x>191</x>
+     <y>373</y>
+     <width>138</width>
      <height>25</height>
     </rect>
    </property>
    <property name="text">
-    <string>reduce Inventory</string>
+    <string>کاهش از انبار</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="showIngerBtn">
+   <property name="geometry">
+    <rect>
+     <x>191</x>
+     <y>337</y>
+     <width>118</width>
+     <height>29</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>نمایش مواد اولیه</string>
    </property>
   </widget>
  </widget>

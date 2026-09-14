@@ -1,6 +1,7 @@
 #include "addingredientdialog.h"
 #include "ui_addingredientdialog.h"
 #include <QMessageBox>
+#include <QInputDialog>
 #include "../../utils/validation/inputvalidator.h"
 
 AddIngredientDialog::AddIngredientDialog(AppManager &appManager, QWidget *parent):
@@ -28,10 +29,12 @@ AddIngredientDialog::AddIngredientDialog(AppManager &appManager, QWidget *parent
         Ingredient::Unit::Kilogram,
         0,
         0,
-        ""
+        ":/defultPic/images.png"
         );
+
     id=0;
     ui->showUnit->setText(Ingredient::unitToString(Ingredient::indexToUnit(1)));
+    updateImage();
 
 }
 
@@ -42,14 +45,33 @@ void AddIngredientDialog::updateImage()
     {
         pixmap.load(in.getImagePath());
     }else{
-        pixmap.load(":/images/default.png");
+        pixmap.load(":/defultPic/images.png");
     }
     pixmap = pixmap.scaled(
         ui->labelPicture->size(),
-        Qt::KeepAspectRatio,
+        Qt::IgnoreAspectRatio,
         Qt::SmoothTransformation
         );
-    ui->labelPicture->setPixmap(pixmap);
+
+    // Round corners
+    QPixmap roundedPixmap(pixmap.size());
+    roundedPixmap.fill(Qt::transparent);
+
+    QPainter painter(&roundedPixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    QPainterPath path;
+    path.addRoundedRect(
+        roundedPixmap.rect(),
+        12,
+        12
+        );
+
+    painter.setClipPath(path);
+    painter.drawPixmap(0, 0, pixmap);
+
+    painter.end();
+    ui->labelPicture->setPixmap(roundedPixmap);
     return ;
 }
 
@@ -240,5 +262,320 @@ void AddIngredientDialog::setLabelUnit(int index)
         ui->showUnit->setText("?");
         break;
     }
+}
+
+
+void AddIngredientDialog::on_tabdilVahed_clicked()
+{
+    // ========================================
+    // 1. Determine ingredient's native unit
+    // ========================================
+
+    Ingredient::Unit ingredientUnit;
+
+    switch (ui->comboBoxunit->currentIndex())
+    {
+    case 0:
+        ingredientUnit = Ingredient::Unit::Kilogram;
+        break;
+
+    case 1:
+        ingredientUnit = Ingredient::Unit::Gram;
+        break;
+
+    case 2:
+        ingredientUnit = Ingredient::Unit::Piece;
+        break;
+
+    default:
+        ingredientUnit = Ingredient::Unit::Kilogram;
+        break;
+    }
+
+    // ========================================
+    // 2. Ask user which unit they want to enter
+    // ========================================
+
+    QStringList units;
+
+    units << "کیلوگرم"
+          << "گرم"
+          << "تعداد";
+
+    bool ok = false;
+
+    QString selectedUnit =
+        QInputDialog::getItem(
+            this,
+            "واحد مقدار",
+            "مقدار را به چه واحدی می‌خواهید وارد کنید؟",
+            units,
+            0,
+            false,
+            &ok
+            );
+
+    if (!ok)
+    {
+        return;
+    }
+
+    // ========================================
+    // 3. Determine input unit
+    // ========================================
+
+    Ingredient::Unit inputUnit;
+
+    if (selectedUnit == "کیلوگرم")
+    {
+        inputUnit = Ingredient::Unit::Kilogram;
+    }
+    else if (selectedUnit == "گرم")
+    {
+        inputUnit = Ingredient::Unit::Gram;
+    }
+    else
+    {
+        inputUnit = Ingredient::Unit::Piece;
+    }
+
+    // ========================================
+    // 4. Ask for quantity
+    // ========================================
+
+    QString quantityText;
+
+    if (inputUnit == Ingredient::Unit::Kilogram)
+    {
+        quantityText = "چند کیلوگرم؟";
+    }
+    else if (inputUnit == Ingredient::Unit::Gram)
+    {
+        quantityText = "چند گرم؟";
+    }
+    else
+    {
+        quantityText = "چند عدد؟";
+    }
+
+    double quantity =
+        QInputDialog::getDouble(
+            this,
+            "مقدار",
+            quantityText,
+            1.0,
+            0.001,
+            1000000.0,
+            3,
+            &ok
+            );
+
+    if (!ok)
+    {
+        return;
+    }
+
+    if (quantity <= 0)
+    {
+        QMessageBox::warning(
+            this,
+            "خطا",
+            "مقدار باید بیشتر از صفر باشد."
+            );
+
+        return;
+    }
+
+    // ========================================
+    // 5. Ask for TOTAL price
+    // ========================================
+
+    double totalPrice =
+        QInputDialog::getDouble(
+            this,
+            "قیمت کل",
+            "قیمت کل این مقدار را وارد کنید:",
+            0.0,
+            0.0,
+            1000000000000.0,
+            0,
+            &ok
+            );
+
+    if (!ok)
+    {
+        return;
+    }
+
+    if (totalPrice <= 0)
+    {
+        QMessageBox::warning(
+            this,
+            "خطا",
+            "قیمت باید بیشتر از صفر باشد."
+            );
+
+        return;
+    }
+
+    // ========================================
+    // 6. Calculate price per input unit
+    // ========================================
+
+    double pricePerInputUnit =
+        totalPrice / quantity;
+
+    // ========================================
+    // 7. Check if weight per unit is needed
+    // ========================================
+
+    bool needsWeightPerUnit =
+        (ingredientUnit == Ingredient::Unit::Piece &&
+         inputUnit != Ingredient::Unit::Piece)
+        ||
+        (ingredientUnit != Ingredient::Unit::Piece &&
+         inputUnit == Ingredient::Unit::Piece);
+
+    double weightPerUnit = 0.0;
+
+    if (needsWeightPerUnit)
+    {
+        bool ok = false;
+
+        weightPerUnit = QInputDialog::getDouble(
+            this,
+            "وزن هر عدد",
+            "وزن هر عدد چند گرم است؟",
+            1.0,      // مقدار پیش‌فرض
+            0.01,     // حداقل
+            100000.0, // حداکثر
+            2,        // تعداد رقم اعشار
+            &ok
+            );
+
+        if (!ok)
+        {
+            return;
+        }
+
+        if (weightPerUnit <= 0)
+        {
+            QMessageBox::warning(
+                this,
+                "خطا",
+                "وزن هر عدد باید بیشتر از صفر باشد."
+                );
+
+            return;
+        }
+    }
+
+    // ========================================
+    // 8. Convert price to ingredient's unit
+    // ========================================
+
+    double finalPrice = pricePerInputUnit;
+
+    // ----------------------------------------
+    // Native unit = Kilogram
+    // ----------------------------------------
+
+    if (ingredientUnit == Ingredient::Unit::Kilogram)
+    {
+        if (inputUnit == Ingredient::Unit::Kilogram)
+        {
+            // Kg -> Kg
+
+            finalPrice = pricePerInputUnit;
+        }
+        else if (inputUnit == Ingredient::Unit::Gram)
+        {
+            // Gram -> Kg
+
+            finalPrice =
+                pricePerInputUnit * 1000.0;
+        }
+        else if (inputUnit == Ingredient::Unit::Piece)
+        {
+            // Piece -> Gram -> Kg
+
+            double pricePerGram =
+                pricePerInputUnit / weightPerUnit;
+
+            finalPrice =
+                pricePerGram * 1000.0;
+        }
+    }
+
+    // ----------------------------------------
+    // Native unit = Gram
+    // ----------------------------------------
+
+    else if (ingredientUnit == Ingredient::Unit::Gram)
+    {
+        if (inputUnit == Ingredient::Unit::Gram)
+        {
+            // Gram -> Gram
+
+            finalPrice = pricePerInputUnit;
+        }
+        else if (inputUnit == Ingredient::Unit::Kilogram)
+        {
+            // Kg -> Gram
+
+            finalPrice =
+                pricePerInputUnit / 1000.0;
+        }
+        else if (inputUnit == Ingredient::Unit::Piece)
+        {
+            // Piece -> Gram
+
+            finalPrice =
+                pricePerInputUnit / weightPerUnit;
+        }
+    }
+
+    // ----------------------------------------
+    // Native unit = Piece
+    // ----------------------------------------
+
+    else if (ingredientUnit == Ingredient::Unit::Piece)
+    {
+        if (inputUnit == Ingredient::Unit::Piece)
+        {
+            // Piece -> Piece
+
+            finalPrice = pricePerInputUnit;
+        }
+        else if (inputUnit == Ingredient::Unit::Gram)
+        {
+            // Gram -> Piece
+
+            finalPrice =
+                pricePerInputUnit * weightPerUnit;
+        }
+        else if (inputUnit == Ingredient::Unit::Kilogram)
+        {
+            // Kg -> Gram -> Piece
+
+            double pricePerGram =
+                pricePerInputUnit / 1000.0;
+
+            finalPrice =
+                pricePerGram * weightPerUnit;
+        }
+    }
+
+    // ========================================
+    // 9. Put final price into lineEditPrice
+    // ========================================
+
+    ui->lineEditPrice->setText(
+        QString::number(
+            finalPrice,
+            'f',
+            0
+            )
+        );
 }
 

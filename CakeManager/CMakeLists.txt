@@ -51,6 +51,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/ui/DailyCard/addcaketodaily.h src/ui/DailyCard/addcaketodaily.cpp src/ui/DailyCard/addcaketodaily.ui
         src/ui/DailyCard/cakeselectiondialog.h src/ui/DailyCard/cakeselectiondialog.cpp src/ui/DailyCard/cakeselectiondialog.ui
         src/utils/outputcontroll.h src/utils/outputcontroll.cpp
+        src/managers/thememanager.h src/managers/thememanager.cpp
 
 
 

@@ -66,6 +66,15 @@ bool AppManager::initialize()
     // Load inventory
     m_inventory = m_database.getInventoryMap();
 
+    qDebug() << "===== INVENTORY LOADED =====";
+
+    for (const auto& [id, quantity] : m_inventory)
+    {
+        qDebug() << "Ingredient ID:"
+                 << id
+                 << "Quantity:"
+                 << quantity;
+    }
     m_hasUnsavedChanges = false;
 
     return true;
@@ -805,7 +814,6 @@ bool AppManager::deleteInventory(qint64 ingredientId)
     }
 
     m_inventory.erase(it);
-
     markAsChanged();
 
     return true;
@@ -978,6 +986,8 @@ void AppManager::markAsChanged()
 {
     this->m_hasUnsavedChanges=true;
 }
+
+
 std::optional<double> AppManager::calculateCakeFinalPrice(qint64 cakeId) const{
     std::optional<double> price=calculateCakeCost(cakeId);
     if(!price.has_value()){

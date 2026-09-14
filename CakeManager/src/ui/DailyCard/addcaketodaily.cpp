@@ -18,6 +18,9 @@ AddCakeToDaily::AddCakeToDaily(
 {
     ui->setupUi(this);
 
+    ui->doubleSpinBoxQuantity->setMaximum(10000);
+    ui->doubleSpinBoxWeight->setMaximum(10000);
+
     connect(
         ui->comboBox,
         QOverload<int>::of(&QComboBox::currentIndexChanged),
@@ -43,6 +46,7 @@ AddCakeToDaily::AddCakeToDaily(
     ui->comboBox->setEnabled(false);
     ui->doubleSpinBoxWeight->setEnabled(false);
     ui->doubleSpinBoxQuantity->setEnabled(false);
+    updatePic(":/defultPic/images.png");
 }
 
 void AddCakeToDaily::updateCake(qint64 cakeid)
@@ -69,16 +73,35 @@ void AddCakeToDaily::updatePic(QString imagePath)
     }
     else
     {
-        pixmap.load(":/images/default.png");
+        pixmap.load(":/defultPic/images.png");
     }
 
     pixmap = pixmap.scaled(
         ui->Image->size(),
-        Qt::KeepAspectRatio,
+        Qt::IgnoreAspectRatio,
         Qt::SmoothTransformation
         );
 
-    ui->Image->setPixmap(pixmap);
+    // Round corners
+    QPixmap roundedPixmap(pixmap.size());
+    roundedPixmap.fill(Qt::transparent);
+
+    QPainter painter(&roundedPixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    QPainterPath path;
+    path.addRoundedRect(
+        roundedPixmap.rect(),
+        12,
+        12
+        );
+
+    painter.setClipPath(path);
+    painter.drawPixmap(0, 0, pixmap);
+
+    painter.end();
+
+    ui->Image->setPixmap(roundedPixmap);
 }
 
 qint64 AddCakeToDaily::getCakeId()

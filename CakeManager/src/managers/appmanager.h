@@ -251,6 +251,7 @@ public:
     //this func call when any changes happend in app without saving to database this func will set m_hasUnsavedChanges to true
     void markAsChanged();
 
+
 };
 
 #endif // APPMANAGER_H

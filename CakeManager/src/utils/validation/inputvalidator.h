@@ -2,6 +2,8 @@
 #define INPUTVALIDATOR_H
 
 #include <QLineEdit>
+#include <QPainter>
+#include <QPainterPath>
 
 class InputValidator
 {

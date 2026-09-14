@@ -1,7 +1,7 @@
 #include "outputcontroll.h"
 
 outPutControll::outPutControll() {}
-
+//this func calculate cost as tooman
 QString outPutControll::formatPrice(double value)
 {
     value /= 1000.0;

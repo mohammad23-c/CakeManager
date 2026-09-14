@@ -11,9 +11,11 @@ AddCakeDialog::AddCakeDialog(
     : QDialog(parent),
     ui(new Ui::AddCakeDialog),
     m_appManager(appManager),
-    m_cakeId(0)
+    m_cakeId(0),
+    imagePath(":/defultPic/images.png")
 {
     ui->setupUi(this);
+    updatePic();
 }
 
 void AddCakeDialog::updatePic()
@@ -26,16 +28,34 @@ void AddCakeDialog::updatePic()
     }
     else
     {
-        pixmap.load(":/images/default.png");
+        pixmap.load(":/defultPic/images.png");
     }
 
     pixmap = pixmap.scaled(
         ui->labelPicture->size(),
-        Qt::KeepAspectRatio,
+        Qt::IgnoreAspectRatio,
         Qt::SmoothTransformation
         );
+    // Round corners
+    QPixmap roundedPixmap(pixmap.size());
+    roundedPixmap.fill(Qt::transparent);
 
-    ui->labelPicture->setPixmap(pixmap);
+    QPainter painter(&roundedPixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    QPainterPath path;
+    path.addRoundedRect(
+        roundedPixmap.rect(),
+        12,
+        12
+        );
+
+    painter.setClipPath(path);
+    painter.drawPixmap(0, 0, pixmap);
+
+    painter.end();
+
+    ui->labelPicture->setPixmap(roundedPixmap);
 }
 
 qint64 AddCakeDialog::getNewCakeId() const

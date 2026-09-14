@@ -4,9 +4,8 @@
 #include <QWidget>
 #include "../../managers/appmanager.h"
 
-class QLabel;
+    class QLabel;
 class QHBoxLayout;
-class QMouseEvent;
 
 class DailyCakeCard : public QWidget
 {
@@ -62,10 +61,13 @@ private:
 
     AppManager& m_appManager;
 
+    QWidget* m_cardWidget;
+
     QLabel* m_nameLabel;
     QLabel* m_quantityLabel;
 
     QHBoxLayout* m_layout;
+    QHBoxLayout* m_cardLayout;
 
     qint64 m_cakeId;
 

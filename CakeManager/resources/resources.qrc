@@ -2,4 +2,7 @@
     <qresource prefix="/defultPic">
         <file>images.png</file>
     </qresource>
+    <qresource prefix="/styles">
+        <file>dark.qss</file>
+    </qresource>
 </RCC>

@@ -464,16 +464,12 @@ bool IngredientSelectionDialog::isIngredientSelected(
 // Select Ingredient
 // =========================================
 
-void IngredientSelectionDialog::selectIngredient(
-    qint64 ingredientId
-    )
+void IngredientSelectionDialog::selectIngredient(qint64 ingredientId)
 {
     if (isIngredientSelected(ingredientId))
     {
         return;
     }
-
-    bool ok = false;
 
     auto ingredient =
         m_appManager.findIngredient(ingredientId);
@@ -483,19 +479,36 @@ void IngredientSelectionDialog::selectIngredient(
         return;
     }
 
-    QString unitText;
+    // --------------------------------
+    // Step 1: Available units
+    // --------------------------------
 
-    unitText=Ingredient::unitToString(ingredient->getUnit());
+    QStringList units;
 
-    double quantity =
-        QInputDialog::getDouble(
+    units << "Gram"
+          << "Kilogram";
+
+    if (ingredient->getUnit() == Ingredient::Unit::Piece)
+    {
+        units << "Piece";
+    }
+    else
+    {
+        // For Gram/Kilogram ingredients,
+        // Piece is also allowed.
+        units << "Piece";
+    }
+
+    bool ok = false;
+
+    QString selectedUnit =
+        QInputDialog::getItem(
             this,
-            "Ingredient Quantity",
-            "Enter quantity (" + unitText + "):",
-            0.0,
-            0.0,
-            1000000.0,
-            2,
+            "واحد مقدار",
+            "واحد مقدار را انتخاب کنید:",
+            units,
+            0,
+            false,
             &ok
             );
 
@@ -512,17 +525,245 @@ void IngredientSelectionDialog::selectIngredient(
         return;
     }
 
-    // Create CakeIngredient
+    // --------------------------------
+    // Step 2: Convert text to enum
+    // --------------------------------
+
+    Ingredient::Unit inputUnit;
+
+    if (selectedUnit == "Gram")
+    {
+        inputUnit = Ingredient::Unit::Gram;
+    }
+    else if (selectedUnit == "Kilogram")
+    {
+        inputUnit = Ingredient::Unit::Kilogram;
+    }
+    else
+    {
+        inputUnit = Ingredient::Unit::Piece;
+    }
+
+    // --------------------------------
+    // Step 3: Get quantity
+    // --------------------------------
+
+    double quantity =
+        QInputDialog::getDouble(
+            this,
+            "مقدار ماده",
+            "مقدار را وارد کنید (" + selectedUnit + "):",
+            0.0,
+            0.0,
+            1000000.0,
+            3,
+            &ok
+            );
+
+    if (!ok)
+    {
+        auto item =
+            m_ingredientItems.find(ingredientId);
+
+        if (item != m_ingredientItems.end())
+        {
+            item->second.selectButton->setChecked(false);
+        }
+
+        return;
+    }
+
+    // --------------------------------
+    // Step 4: Convert to native unit
+    // --------------------------------
+
+    Ingredient::Unit ingredientUnit =
+        ingredient->getUnit();
+
+    double finalQuantity = quantity;
+
+    // ========================================
+    // Native unit = Piece
+    // ========================================
+
+    if (ingredientUnit == Ingredient::Unit::Piece)
+    {
+        qint64 weightPerUnit =
+            ingredient->getWeightPerUnit();
+
+        if (weightPerUnit <= 0)
+        {
+            QMessageBox::warning(
+                this,
+                "ماده نامعتبر",
+                "وزن هر عدد برای این ماده مشخص نشده است."
+                );
+
+            auto item =
+                m_ingredientItems.find(ingredientId);
+
+            if (item != m_ingredientItems.end())
+            {
+                item->second.selectButton->setChecked(false);
+            }
+
+            return;
+        }
+
+        if (inputUnit == Ingredient::Unit::Piece)
+        {
+            // Piece -> Piece
+
+            finalQuantity = quantity;
+        }
+        else if (inputUnit == Ingredient::Unit::Gram)
+        {
+            // Gram -> Piece
+
+            finalQuantity =
+                quantity / weightPerUnit;
+        }
+        else if (inputUnit == Ingredient::Unit::Kilogram)
+        {
+            // Kilogram -> Gram -> Piece
+
+            finalQuantity =
+                (quantity * 1000.0)
+                / weightPerUnit;
+        }
+    }
+
+    // ========================================
+    // Native unit = Gram
+    // ========================================
+
+    else if (ingredientUnit == Ingredient::Unit::Gram)
+    {
+        if (inputUnit == Ingredient::Unit::Gram)
+        {
+            // Gram -> Gram
+
+            finalQuantity = quantity;
+        }
+        else if (inputUnit == Ingredient::Unit::Kilogram)
+        {
+            // Kilogram -> Gram
+
+            finalQuantity =
+                quantity * 1000.0;
+        }
+        else if (inputUnit == Ingredient::Unit::Piece)
+        {
+            // Ask weight of one piece
+
+            double weightPerPiece =
+                QInputDialog::getDouble(
+                    this,
+                    "وزن هر عدد",
+                    "وزن هر عدد چند گرم است؟",
+                    1.0,
+                    0.001,
+                    1000000.0,
+                    3,
+                    &ok
+                    );
+
+            if (!ok)
+            {
+                auto item =
+                    m_ingredientItems.find(ingredientId);
+
+                if (item != m_ingredientItems.end())
+                {
+                    item->second.selectButton->setChecked(false);
+                }
+
+                return;
+            }
+
+            // Piece -> Gram
+
+            finalQuantity =
+                quantity * weightPerPiece;
+        }
+    }
+
+    // ========================================
+    // Native unit = Kilogram
+    // ========================================
+
+    else if (ingredientUnit == Ingredient::Unit::Kilogram)
+    {
+        if (inputUnit == Ingredient::Unit::Kilogram)
+        {
+            // Kilogram -> Kilogram
+
+            finalQuantity = quantity;
+        }
+        else if (inputUnit == Ingredient::Unit::Gram)
+        {
+            // Gram -> Kilogram
+
+            finalQuantity =
+                quantity / 1000.0;
+        }
+        else if (inputUnit == Ingredient::Unit::Piece)
+        {
+            // Ask weight of one piece
+
+            double weightPerPiece =
+                QInputDialog::getDouble(
+                    this,
+                    "وزن هر عدد",
+                    "وزن هر عدد چند گرم است؟",
+                    1.0,
+                    0.001,
+                    1000000.0,
+                    3,
+                    &ok
+                    );
+
+            if (!ok)
+            {
+                auto item =
+                    m_ingredientItems.find(ingredientId);
+
+                if (item != m_ingredientItems.end())
+                {
+                    item->second.selectButton->setChecked(false);
+                }
+
+                return;
+            }
+
+            // Piece -> Gram -> Kilogram
+
+            finalQuantity =
+                (quantity * weightPerPiece)
+                / 1000.0;
+        }
+    }
+
+    // --------------------------------
+    // Step 5: Create CakeIngredient
+    // --------------------------------
+
     CakeIngredient cakeIngredient;
 
-    cakeIngredient.ingredientId = ingredientId;
-    cakeIngredient.quantity = quantity;
+    cakeIngredient.ingredientId =
+        ingredientId;
+
+    cakeIngredient.quantity =
+        finalQuantity;
 
     m_cakeIngredients.push_back(
         cakeIngredient
         );
 
-    // Change card appearance
+    // --------------------------------
+    // Step 6: Update UI
+    // --------------------------------
+
     auto item =
         m_ingredientItems.find(ingredientId);
 

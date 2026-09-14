@@ -3,6 +3,8 @@
 #include <QMessageBox>
 #include <optional>
 #include "../CakeCard/ingredientselectiondialog.h"
+#include <QPainter>
+#include <QPainterPath>
 
 dailyCakeCardSetting::dailyCakeCardSetting(AppManager &appManager, qint64 dailyId, qint64 cakeId, QWidget *parent):
     QDialog(parent)
@@ -13,6 +15,9 @@ dailyCakeCardSetting::dailyCakeCardSetting(AppManager &appManager, qint64 dailyI
 {
     ui->setupUi(this);
     ui->reduceInventoryCheckBox->setChecked(true);
+
+    ui->doubleSpinBoxQuantity->setMaximum(10000);
+    ui->doubleSpinBoxWeight->setMaximum(10000);
 
     connect(
         ui->comboBoxUnit,
@@ -110,11 +115,30 @@ void dailyCakeCardSetting::updatePic()
 
     pixmap = pixmap.scaled(
         ui->Image->size(),
-        Qt::KeepAspectRatio,
+        Qt::IgnoreAspectRatio,
         Qt::SmoothTransformation
         );
 
-    ui->Image->setPixmap(pixmap);
+    // Round corners
+    QPixmap roundedPixmap(pixmap.size());
+    roundedPixmap.fill(Qt::transparent);
+
+    QPainter painter(&roundedPixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    QPainterPath path;
+    path.addRoundedRect(
+        roundedPixmap.rect(),
+        12,
+        12
+        );
+
+    painter.setClipPath(path);
+    painter.drawPixmap(0, 0, pixmap);
+
+    painter.end();
+
+    ui->Image->setPixmap(roundedPixmap);
 }
 
 dailyCakeCardSetting::~dailyCakeCardSetting()

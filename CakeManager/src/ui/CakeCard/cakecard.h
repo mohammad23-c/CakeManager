@@ -73,6 +73,9 @@ protected:
 
 private:
 
+    QWidget* m_cardWidget;
+    QVBoxLayout* m_cardLayout;
+
     QLabel* m_imageLabel;
     QLabel* m_nameLabel;
     QVBoxLayout* m_layout;
@@ -80,7 +83,6 @@ private:
     qint64 m_cakeId;
 
     QString m_name;
-
     QString m_imagePath;
 };
 

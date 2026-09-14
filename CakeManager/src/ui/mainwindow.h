@@ -14,6 +14,9 @@
 #include "CakeCard/cakecard.h"
 #include <QDateEdit>
 
+
+QString getDatabasePath();
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -51,6 +54,8 @@ public:
     void clearIngredientGrid();
     //load cakes that be in the vector
     void loadIngredientCards(const std::vector<qint64>& ingredientIds);
+
+    void reloadIngredientCards();
 
     //=================================================================
     //cakes

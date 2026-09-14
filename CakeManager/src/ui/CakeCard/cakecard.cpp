@@ -3,6 +3,8 @@
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QSizePolicy>
+#include <QPainter>
+#include <QPainterPath>
 
 CakeCard::CakeCard(
     qint64 cakeId,
@@ -14,10 +16,32 @@ CakeCard::CakeCard(
     m_cakeId(cakeId),
     m_name(name),
     m_imagePath(imagePath),
-    m_imageLabel(new QLabel(this)),
-    m_nameLabel(new QLabel(this)),
-    m_layout(new QVBoxLayout(this))
+    m_cardWidget(new QWidget(this)),
+    m_imageLabel(new QLabel(m_cardWidget)),
+    m_nameLabel(new QLabel(m_cardWidget)),
+    m_layout(new QVBoxLayout(this)),
+    m_cardLayout(new QVBoxLayout(m_cardWidget))
 {
+    m_cardWidget->setObjectName("cakeCardWidget");
+
+    // setStyleSheet(
+    //     "background-color: #3A2920;"
+    //     "border: 2px solid #B8863B;"
+    //     "border-radius: 16px;"
+    //     );
+
+    // m_imageLabel->setStyleSheet(
+    //     "background-color: #25272D;"
+    //     "border: 2px solid #B8863B;"
+    //     "border-radius: 12px;"
+    //     );
+
+    // m_nameLabel->setStyleSheet(
+    //     "background-color: transparent;"
+    //     "border: none;"
+    //     "color: #FFFFFF;"
+    //     "font-weight: bold;"
+    //     );
     // =========================================
     // Card Size
     // =========================================
@@ -45,11 +69,15 @@ CakeCard::CakeCard(
     // Layout
     // =========================================
 
-    m_layout->setContentsMargins(10, 10, 10, 10);
-    m_layout->setSpacing(10);
+    m_layout->setContentsMargins(0, 0, 0, 0);
+    m_layout->addWidget(m_cardWidget);
+    /////////////////////////////////////////////
 
-    m_layout->addWidget(m_imageLabel);
-    m_layout->addWidget(m_nameLabel);
+    m_cardLayout->setContentsMargins(10, 10, 10, 10);
+    m_cardLayout->setSpacing(10);
+
+    m_cardLayout->addWidget(m_imageLabel);
+    m_cardLayout->addWidget(m_nameLabel);
 
     // =========================================
     // Initial UI
@@ -114,6 +142,7 @@ void CakeCard::setImagePath(const QString& imagePath)
 
 void CakeCard::updateImage()
 {
+
     QPixmap pixmap;
 
     if (!m_imagePath.isEmpty() && QFile::exists(m_imagePath))
@@ -127,11 +156,32 @@ void CakeCard::updateImage()
 
     pixmap = pixmap.scaled(
         m_imageLabel->size(),
-        Qt::KeepAspectRatio,
+        Qt::IgnoreAspectRatio,
         Qt::SmoothTransformation
         );
 
-    m_imageLabel->setPixmap(pixmap);
+    // Round corners
+    QPixmap roundedPixmap(pixmap.size());
+    roundedPixmap.fill(Qt::transparent);
+
+    QPainter painter(&roundedPixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    QPainterPath path;
+    path.addRoundedRect(
+        roundedPixmap.rect(),
+        12,
+        12
+        );
+
+    painter.setClipPath(path);
+    painter.drawPixmap(0, 0, pixmap);
+
+    painter.end();
+
+    m_imageLabel->setPixmap(roundedPixmap);
+    qDebug() << "IMAGE 15";
+
 }
 
 // =========================================

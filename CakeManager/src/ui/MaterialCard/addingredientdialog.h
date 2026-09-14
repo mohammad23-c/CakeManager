@@ -31,6 +31,8 @@ private slots:
 
     void setLabelUnit(int index);
 
+    void on_tabdilVahed_clicked();
+
 private:
 
     Ui::AddIngredientDialog *ui;

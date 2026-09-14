@@ -4,6 +4,7 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QInputDialog>
 MaterialDialog::MaterialDialog(
     qint64 ingredientId,
     AppManager& appManager,
@@ -31,6 +32,7 @@ MaterialDialog::MaterialDialog(
     //find ingredient by id
     auto ingredient = m_appManager.findIngredient(m_ingredientId);
     auto inventory= m_appManager.findInventory(m_ingredientId);
+
     if (!ingredient.has_value())
     {
         QMessageBox::warning(
@@ -41,6 +43,13 @@ MaterialDialog::MaterialDialog(
 
         reject();
         return;
+    }
+    if(!inventory.has_value()){
+        QMessageBox::warning(
+            this,
+            "Error",
+            "inventory not found"
+            );
     }
     in=new Ingredient(ingredient.value());
     //default
@@ -97,14 +106,33 @@ void MaterialDialog::updateImage()
     {
         pixmap.load(in->getImagePath());
     }else{
-        pixmap.load(":/images/default.png");
+        pixmap.load(":/defultPic/images.png");
     }
     pixmap = pixmap.scaled(
         ui->Image->size(),
-        Qt::KeepAspectRatio,
+        Qt::IgnoreAspectRatio,
         Qt::SmoothTransformation
         );
-    ui->Image->setPixmap(pixmap);
+
+    // Round corners
+    QPixmap roundedPixmap(pixmap.size());
+    roundedPixmap.fill(Qt::transparent);
+
+    QPainter painter(&roundedPixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    QPainterPath path;
+    path.addRoundedRect(
+        roundedPixmap.rect(),
+        12,
+        12
+        );
+
+    painter.setClipPath(path);
+    painter.drawPixmap(0, 0, pixmap);
+
+    painter.end();
+    ui->Image->setPixmap(roundedPixmap);
     return ;
 }
 
@@ -172,17 +200,19 @@ void MaterialDialog::on_save_clicked()
         return;
     }
     double inventory=ui->lineEditInventory->text().toDouble();
-    if(m_appManager.updateIngredient(*in)&&
-        m_appManager.updateInventory(in->getId(),inventory)){
-        m_appManager.inventorySave();
-        m_appManager.ingredientSave();
-        accept();
-        return ;
-    }else{
-        QMessageBox::warning(this,"nameNot uniq","cant update : check name is unique or not");
+    if(!m_appManager.updateIngredient(*in)){
+        QMessageBox::warning(this,"name not unique","please choose another name ");
         ui->NamelineEdit->setFocus();
         ui->NamelineEdit->setStyleSheet("border: 1px solid red;");
+        return;
     }
+    if(!m_appManager.updateInventory(in->getId(),inventory)){
+        QMessageBox::warning(this,"inventory cant update","inventory cant update");
+        return;
+    }
+    m_appManager.inventorySave();
+    m_appManager.ingredientSave();
+    accept();
     return ;
 }
 
@@ -226,21 +256,364 @@ void MaterialDialog::on_deleteIngredent_clicked()
             "Are you sure you want to delete this ingredient?",
             QMessageBox::Yes | QMessageBox::No
             );
-    if(result==QMessageBox::Yes){
-        bool s=m_appManager.deleteIngredient(m_ingredientId);
-        if(!s){
+
+    if (result == QMessageBox::Yes)
+    {
+        auto inventoryO=m_appManager.findInventory(m_ingredientId);
+        double inventory=0;
+        if(!inventoryO.has_value()){
+            QMessageBox::warning(this,"inventory not found","inventory not found");
+        }else{
+            inventory=inventoryO.value();
+        }
+        if(m_appManager.isIngredientUsedInCake(m_ingredientId)){
             QMessageBox::warning(
                 this,
                 "Cannot Delete Ingredient",
                 "This ingredient is used in a cake and cannot be deleted."
                 );
-            return ;
+
+            return;
         }
-        m_appManager.deleteInventory(m_ingredientId);
-        m_appManager.ingredientSave();
+
+        bool s = m_appManager.deleteInventory(m_ingredientId);
+        if(!s){
+            QMessageBox::warning(
+                this,
+                "Cannot Delete Inventory",
+                "its inventory could not be deleted."
+                );
+
+            return;
+        }
+        if(!m_appManager.deleteIngredient(m_ingredientId)){
+            QMessageBox::warning(this,
+                                 "cant delete ingerdient",
+                                 "cant delete ingredient");
+            m_appManager.addInventory(m_ingredientId,inventory);
+            return;
+        }
         emit deleteIng(m_ingredientId);
+        m_appManager.ingredientSave();
+        m_appManager.inventorySave();
+
         accept();
     }
-    return ;
+
+    return;
+}
+
+
+void MaterialDialog::on_tabdilVahed_clicked()
+{
+    // ========================================
+    // 1. Determine ingredient's native unit
+    // ========================================
+
+    Ingredient::Unit ingredientUnit;
+
+    switch (ui->UnitcomboBox->currentIndex())
+    {
+    case 0:
+        ingredientUnit = Ingredient::Unit::Kilogram;
+        break;
+
+    case 1:
+        ingredientUnit = Ingredient::Unit::Gram;
+        break;
+
+    case 2:
+        ingredientUnit = Ingredient::Unit::Piece;
+        break;
+
+    default:
+        ingredientUnit = Ingredient::Unit::Kilogram;
+        break;
+    }
+
+    // ========================================
+    // 2. Ask user which unit they want to enter
+    // ========================================
+
+    QStringList units;
+
+    units << "کیلوگرم"
+          << "گرم"
+          << "تعداد";
+
+    bool ok = false;
+
+    QString selectedUnit =
+        QInputDialog::getItem(
+            this,
+            "واحد مقدار",
+            "مقدار را به چه واحدی می‌خواهید وارد کنید؟",
+            units,
+            0,
+            false,
+            &ok
+            );
+
+    if (!ok)
+    {
+        return;
+    }
+
+    // ========================================
+    // 3. Determine input unit
+    // ========================================
+
+    Ingredient::Unit inputUnit;
+
+    if (selectedUnit == "کیلوگرم")
+    {
+        inputUnit = Ingredient::Unit::Kilogram;
+    }
+    else if (selectedUnit == "گرم")
+    {
+        inputUnit = Ingredient::Unit::Gram;
+    }
+    else
+    {
+        inputUnit = Ingredient::Unit::Piece;
+    }
+
+    // ========================================
+    // 4. Ask for quantity
+    // ========================================
+
+    QString quantityText;
+
+    if (inputUnit == Ingredient::Unit::Kilogram)
+    {
+        quantityText = "چند کیلوگرم؟";
+    }
+    else if (inputUnit == Ingredient::Unit::Gram)
+    {
+        quantityText = "چند گرم؟";
+    }
+    else
+    {
+        quantityText = "چند عدد؟";
+    }
+
+    double quantity =
+        QInputDialog::getDouble(
+            this,
+            "مقدار",
+            quantityText,
+            1.0,
+            0.001,
+            1000000.0,
+            3,
+            &ok
+            );
+
+    if (!ok)
+    {
+        return;
+    }
+
+    if (quantity <= 0)
+    {
+        QMessageBox::warning(
+            this,
+            "خطا",
+            "مقدار باید بیشتر از صفر باشد."
+            );
+
+        return;
+    }
+
+    // ========================================
+    // 5. Ask for TOTAL price
+    // ========================================
+
+    double totalPrice =
+        QInputDialog::getDouble(
+            this,
+            "قیمت کل",
+            "قیمت کل این مقدار را وارد کنید:",
+            0.0,
+            0.0,
+            1000000000000.0,
+            0,
+            &ok
+            );
+
+    if (!ok)
+    {
+        return;
+    }
+
+    if (totalPrice <= 0)
+    {
+        QMessageBox::warning(
+            this,
+            "خطا",
+            "قیمت باید بیشتر از صفر باشد."
+            );
+
+        return;
+    }
+
+    // ========================================
+    // 6. Calculate price per input unit
+    // ========================================
+
+    double pricePerInputUnit =
+        totalPrice / quantity;
+
+    // ========================================
+    // 7. Check if weight per unit is needed
+    // ========================================
+
+    bool needsWeightPerUnit =
+        (ingredientUnit == Ingredient::Unit::Piece &&
+         inputUnit != Ingredient::Unit::Piece)
+        ||
+        (ingredientUnit != Ingredient::Unit::Piece &&
+         inputUnit == Ingredient::Unit::Piece);
+
+    double weightPerUnit = 0.0;
+
+    if (needsWeightPerUnit)
+    {
+        bool ok = false;
+
+        weightPerUnit = QInputDialog::getDouble(
+            this,
+            "وزن هر عدد",
+            "وزن هر عدد چند گرم است؟",
+            1.0,      // مقدار پیش‌فرض
+            0.01,     // حداقل
+            100000.0, // حداکثر
+            2,        // تعداد رقم اعشار
+            &ok
+            );
+
+        if (!ok)
+        {
+            return;
+        }
+
+        if (weightPerUnit <= 0)
+        {
+            QMessageBox::warning(
+                this,
+                "خطا",
+                "وزن هر عدد باید بیشتر از صفر باشد."
+                );
+
+            return;
+        }
+    }
+
+    // ========================================
+    // 8. Convert price to ingredient's unit
+    // ========================================
+
+    double finalPrice = pricePerInputUnit;
+
+    // ----------------------------------------
+    // Native unit = Kilogram
+    // ----------------------------------------
+
+    if (ingredientUnit == Ingredient::Unit::Kilogram)
+    {
+        if (inputUnit == Ingredient::Unit::Kilogram)
+        {
+            // Kg -> Kg
+
+            finalPrice = pricePerInputUnit;
+        }
+        else if (inputUnit == Ingredient::Unit::Gram)
+        {
+            // Gram -> Kg
+
+            finalPrice =
+                pricePerInputUnit * 1000.0;
+        }
+        else if (inputUnit == Ingredient::Unit::Piece)
+        {
+            // Piece -> Gram -> Kg
+
+            double pricePerGram =
+                pricePerInputUnit / weightPerUnit;
+
+            finalPrice =
+                pricePerGram * 1000.0;
+        }
+    }
+
+    // ----------------------------------------
+    // Native unit = Gram
+    // ----------------------------------------
+
+    else if (ingredientUnit == Ingredient::Unit::Gram)
+    {
+        if (inputUnit == Ingredient::Unit::Gram)
+        {
+            // Gram -> Gram
+
+            finalPrice = pricePerInputUnit;
+        }
+        else if (inputUnit == Ingredient::Unit::Kilogram)
+        {
+            // Kg -> Gram
+
+            finalPrice =
+                pricePerInputUnit / 1000.0;
+        }
+        else if (inputUnit == Ingredient::Unit::Piece)
+        {
+            // Piece -> Gram
+
+            finalPrice =
+                pricePerInputUnit / weightPerUnit;
+        }
+    }
+
+    // ----------------------------------------
+    // Native unit = Piece
+    // ----------------------------------------
+
+    else if (ingredientUnit == Ingredient::Unit::Piece)
+    {
+        if (inputUnit == Ingredient::Unit::Piece)
+        {
+            // Piece -> Piece
+
+            finalPrice = pricePerInputUnit;
+        }
+        else if (inputUnit == Ingredient::Unit::Gram)
+        {
+            // Gram -> Piece
+
+            finalPrice =
+                pricePerInputUnit * weightPerUnit;
+        }
+        else if (inputUnit == Ingredient::Unit::Kilogram)
+        {
+            // Kg -> Gram -> Piece
+
+            double pricePerGram =
+                pricePerInputUnit / 1000.0;
+
+            finalPrice =
+                pricePerGram * weightPerUnit;
+        }
+    }
+
+    // ========================================
+    // 9. Put final price into lineEditPrice
+    // ========================================
+    ui->PriceLineEdit->setText(
+        QString::number(
+            finalPrice,
+            'f',
+            0
+            )
+        );
 }
 

@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QPixmap>
 #include <QMouseEvent>
+
 class QLabel;
 class QVBoxLayout;
 
@@ -32,7 +33,6 @@ public:
 
     void setIngredientId(qint64 ingredientId);
 
-
     // =========================================
     // Name
     // =========================================
@@ -42,6 +42,7 @@ public:
     void setName(const QString& name);
 
     void updateName();
+
     // =========================================
     // Image Path
     // =========================================
@@ -52,29 +53,37 @@ public:
 
     void updateImage();
 
-    //===========================
-    //update card ui
-    //===========================
+    // =========================================
+    // Update Card UI
+    // =========================================
+
     void updateCard(
         const QString& name,
         const QString& imagePath
         );
+
 signals:
 
     void clicked(qint64 ingredientId);
+
 protected:
+
     void mousePressEvent(QMouseEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
 
 private:
+
+    QWidget* m_cardWidget;
+
     QLabel* m_imageLabel;
     QLabel* m_nameLabel;
+
     QVBoxLayout* m_layout;
+    QVBoxLayout* m_cardLayout;
 
     qint64 m_ingredientId;
 
     QString m_name;
-
     QString m_imagePath;
 };
 

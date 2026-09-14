@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>Cake Manager</Name>
+    <Version>1.0.0</Version>
+    <Title>Cake Manager Setup</Title>
+
+    <Publisher>Cake Manager</Publisher>
+
+    <StartMenuDir>Cake Manager</StartMenuDir>
+    <TargetDir>@HomeDir@/CakeManager</TargetDir>
+</Installer>
